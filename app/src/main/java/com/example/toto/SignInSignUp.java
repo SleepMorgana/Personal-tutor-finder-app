@@ -14,12 +14,15 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -65,6 +68,9 @@ public class SignInSignUp extends AppCompatActivity {
         mViewPager = (ViewPager) findViewById(R.id.container);
         populateViewPager();
 
+        //mViewPager.
+
+
 
     }
 
@@ -91,6 +97,7 @@ public class SignInSignUp extends AppCompatActivity {
         mSectionsPagerAdapter.addFragment(tab);
         mViewPager.setAdapter(mSectionsPagerAdapter);
         mTabLayout.setupWithViewPager(mViewPager);
+
     }
 
 
@@ -122,8 +129,43 @@ public class SignInSignUp extends AppCompatActivity {
         public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             assert getArguments() != null;
-            return inflater.inflate(getArguments().getInt(ARG_LAYOUT), container, false);
+            View layout = inflater.inflate(getArguments().getInt(ARG_LAYOUT), container, false);
+            int currentLayout = getArguments().getInt(ARG_LAYOUT);
+
+            //sign in fragment
+            if (currentLayout == R.layout.sign_in_fragment) {
+
+                Button signIn = (Button) layout.findViewById(R.id.sign_in_button_id);
+                signIn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Log.d("FOO", "BAr");
+                    }
+                });
+
+                Button passButton = (Button) layout.findViewById(R.id.forgotten_passwd_id);
+                passButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Log.d("FOO", "pass");
+                    }
+                });
+            }
+            //sign up fragment
+            if (currentLayout == R.layout.sign_up_fragment) {
+
+                Button signUp = (Button) layout.findViewById(R.id.sign_up_button_id);
+                signUp.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Log.d("FOO", "up");
+                    }
+                });
+
+            }
+            return layout;
         }
+
     }
 
     /**
