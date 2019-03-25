@@ -39,7 +39,7 @@
             android:layout_height="wrap_content"
             app:tabBackground="@android:color/white"
             app:tabIndicatorColor="@color/design_default_color_primary"
-            app:tabTextColor="@android:color/black"></android.support.design.widget.TabLayout>
+            app:tabTextColor="@android:color/black" />
 
     </android.support.design.widget.AppBarLayout>
 
