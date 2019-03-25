@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">My Tutor Finder</string>
+    <string name="title_activity_sign_in_sign_up">SignInSignUp</string>
+    <string name="action_settings">Settings</string>
+    <string name="alt_app_logo">App logo made of a magnifier and a graduate hat</string>
+</resources>
