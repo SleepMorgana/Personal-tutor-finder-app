@@ -53,9 +53,9 @@ public class SignInSignUp extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in_sign_up);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        /*Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);*/
 
 
         mTabLayout = (TabLayout) findViewById(R.id.tabs);
@@ -139,7 +139,7 @@ public class SignInSignUp extends AppCompatActivity {
                 signIn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Log.d("FOO", "BAr");
+                        Log.d("SIGN_IN", "Clicked");
                     }
                 });
 
@@ -147,7 +147,7 @@ public class SignInSignUp extends AppCompatActivity {
                 passButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Log.d("FOO", "pass");
+                        Log.d("FORGOT_PSSWD", "Clicked");
                     }
                 });
             }
@@ -158,7 +158,7 @@ public class SignInSignUp extends AppCompatActivity {
                 signUp.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Log.d("FOO", "up");
+                        Log.d("SIGN_UP", "Clicked");
                     }
                 });
 
