@@ -1,36 +1,35 @@
 package com.example.toto;
 
 import android.os.Build;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.TabLayout;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-
 import android.widget.Button;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class SignInSignUp extends AppCompatActivity {
-
+    private static FirebaseAuth mAuth; // firebase authenticator
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -52,6 +51,8 @@ public class SignInSignUp extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in_sign_up);
+        //Initialize Firebase Auth
+        mAuth = FirebaseAuth.getInstance();
 
         /*Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -67,11 +68,6 @@ public class SignInSignUp extends AppCompatActivity {
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
         populateViewPager();
-
-        //mViewPager.
-
-
-
     }
 
     @Override
@@ -83,6 +79,17 @@ public class SignInSignUp extends AppCompatActivity {
             default:
                 return super.onOptionsItemSelected(item);
 
+        }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        // Check if user is signed in (non-null) and update UI accordingly.
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            //user has already logged in recently
+            //TODO go to next activity
         }
     }
 
@@ -108,8 +115,25 @@ public class SignInSignUp extends AppCompatActivity {
         /**
          * The fragment argument representing the section number for this
          * fragment.
+         * TODO we may want to declare vars for the differnt error messages
          */
         private static final String ARG_LAYOUT = "layout";
+        private final String TAG = "TUTOR_APP";
+        private OnCompleteListener signinAction = new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                if (task.isSuccessful()) {
+                    // Sign in success, TODO go to next activity
+                    Log.d(TAG, "signInUserWithEmail:success");
+
+                } else {
+                    // If sign in fails, display a message to the user.
+                    Log.w(TAG, "signInUserWithEmail:failure", task.getException());
+                    Toast.makeText(getActivity(), "Authentication failed.Please try again.",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+        };
 
         public PlaceholderFragment() {
         }
@@ -129,17 +153,21 @@ public class SignInSignUp extends AppCompatActivity {
         public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             assert getArguments() != null;
-            View layout = inflater.inflate(getArguments().getInt(ARG_LAYOUT), container, false);
+            final View layout = inflater.inflate(getArguments().getInt(ARG_LAYOUT), container, false);
             int currentLayout = getArguments().getInt(ARG_LAYOUT);
 
             //sign in fragment
             if (currentLayout == R.layout.sign_in_fragment) {
-
                 Button signIn = (Button) layout.findViewById(R.id.sign_in_button_id);
                 signIn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Log.d("SIGN_IN", "Clicked");
+                        String username = ((EditText) layout.findViewById(R.id.input_sign_in_username_id)).getText().toString().toLowerCase().trim();
+                        String password = ((EditText) layout.findViewById(R.id.passwd_input_sign_in_id)).getText().toString().trim();
+                        Log.d(TAG, "SIGN_IN Clicked");
+                        //TODO we should use email instead of username
+                        mAuth.signInWithEmailAndPassword(username, password)
+                                .addOnCompleteListener(getActivity(), signinAction);
                     }
                 });
 
@@ -147,18 +175,52 @@ public class SignInSignUp extends AppCompatActivity {
                 passButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Log.d("FORGOT_PSSWD", "Clicked");
+                        Log.d(TAG, "FORGOT_PSSWD Clicked");
                     }
                 });
             }
             //sign up fragment
             if (currentLayout == R.layout.sign_up_fragment) {
-
                 Button signUp = (Button) layout.findViewById(R.id.sign_up_button_id);
                 signUp.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Log.d("SIGN_UP", "Clicked");
+                        String username = ((EditText) layout.findViewById(R.id.input_username_sign_up_id)).getText().toString().trim();
+                        String email = ((EditText) layout.findViewById(R.id.input_email_sign_up_id)).getText().toString().toLowerCase().trim();
+                        String password = ((EditText) layout.findViewById(R.id.input_passwd_sign_up_id)).getText().toString().trim();
+                        String confirmPassword = ((EditText) layout.findViewById(R.id.input_confirm_passwd_sign_up_id)).getText().toString().trim();
+                        Log.d(TAG, "SIGN_UP Clicked");
+                        //check fields
+                        if (username == "" || email == "" || password == "") {
+                            Toast.makeText(getActivity(), "Sign up failed: empty fields",
+                                    Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        if (!password.equals(confirmPassword)) {
+                            Toast.makeText(getActivity(), "Sign up failed: password and confirmation mismatch",
+                                    Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        mAuth.createUserWithEmailAndPassword(email, password)
+                                .addOnCompleteListener(getActivity(), new OnCompleteListener<AuthResult>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<AuthResult> task) {
+                                        if (task.isSuccessful()) {
+                                            // Sign up success, TODO go to next activity
+                                            Log.d(TAG, "createUserWithEmail:success");
+                                            FirebaseUser currentUser = mAuth.getCurrentUser();
+                                            //in case an additional user record may be needed to store the username
+                                            //currentUser.updateProfile(new UserProfileChangeRequest.Builder().setDisplayName(username).build());
+                                        } else {
+                                            // If sign up fails, display a message to the user.
+                                            Log.w(TAG, "createUserWithEmail:failure", task.getException());
+                                            Toast.makeText(getActivity(), "Sign up failed. Please try again.",
+                                                    Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+                                });
                     }
                 });
 

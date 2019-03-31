@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "946026297215",
+    "firebase_url": "https://personal-tutor-finder-app.firebaseio.com",
+    "project_id": "personal-tutor-finder-app",
+    "storage_bucket": "personal-tutor-finder-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:946026297215:android:cc7d6e6aef7d3d43",
+        "android_client_info": {
+          "package_name": "com.example.toto"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "946026297215-jvb4ik3ntp4rk4ta8ucp0vejrqaggfg2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.toto",
+            "certificate_hash": "331bc0dcaf7817db158caa473915efdf13a4e976"
+          }
+        },
+        {
+          "client_id": "946026297215-s8oav87h8meh1of09osun0si7n20jtui.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC4jWEmvpjheGZGsuHuddorKIWjvMA_9Sg"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "946026297215-s8oav87h8meh1of09osun0si7n20jtui.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

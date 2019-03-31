@@ -83,10 +83,10 @@
             app:layout_constraintEnd_toStartOf="@+id/guideline2"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="@+id/guideline"
-            app:layout_constraintTop_toBottomOf="@+id/email1_input_id" />
+            app:layout_constraintTop_toBottomOf="@+id/input_email_sign_up_id" />
 
         <EditText
-            android:id="@+id/editText2"
+            android:id="@+id/input_passwd_sign_up_id"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -124,7 +124,7 @@
             app:layout_constraintTop_toBottomOf="@+id/input_username_sign_up_id" />
 
         <EditText
-            android:id="@+id/email1_input_id"
+            android:id="@+id/input_email_sign_up_id"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -151,10 +151,10 @@
             android:text="@string/confirm_password_txt"
             app:layout_constraintEnd_toStartOf="@+id/guideline2"
             app:layout_constraintStart_toStartOf="@+id/guideline"
-            app:layout_constraintTop_toBottomOf="@+id/editText2" />
+            app:layout_constraintTop_toBottomOf="@+id/input_passwd_sign_up_id" />
 
         <EditText
-            android:id="@+id/editText3"
+            android:id="@+id/input_confirm_passwd_sign_up_id"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -181,7 +181,7 @@
             android:text="@string/role_txt"
             app:layout_constraintEnd_toStartOf="@+id/guideline2"
             app:layout_constraintStart_toStartOf="@+id/guideline"
-            app:layout_constraintTop_toBottomOf="@+id/editText3" />
+            app:layout_constraintTop_toBottomOf="@+id/input_confirm_passwd_sign_up_id" />
 
         <RadioGroup
             android:layout_width="0dp"
