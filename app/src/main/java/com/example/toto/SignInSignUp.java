@@ -20,8 +20,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.example.toto.controllers.users.UserController;
-import com.example.toto.database.users.User;
+import com.example.toto.users.User;
+import com.example.toto.users.UserController;
+import com.example.toto.users.Role;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -104,6 +105,12 @@ public class SignInSignUp extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        UserController.signOut();
+    }
+
     /**
      * Creates the fragments and sets it to ViewPager
      */
@@ -126,7 +133,7 @@ public class SignInSignUp extends AppCompatActivity {
         /**
          * The fragment argument representing the section number for this
          * fragment.
-         * TODO we may want to declare vars for the differnt error messages
+         * TODO we may want to declare vars for the different error messages
          */
         private static final String ARG_LAYOUT = "layout";
         private final String TAG = "TUTOR_APP";
@@ -136,14 +143,28 @@ public class SignInSignUp extends AppCompatActivity {
                 if (task.isSuccessful()) {
                     // Sign in success, TODO go to next activity
                     Log.d(TAG, "signInUserWithEmail:success");
-                    User user = new User(mAuth.getCurrentUser());
                     startMainActivity();
-                    //
-                    //UserController.setCurrentUser();
                 } else {
                     // If sign in fails, display a message to the user.
                     Log.w(TAG, "signInUserWithEmail:failure", task.getException());
                     Toast.makeText(getActivity(), "Authentication failed.Please try again.",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+        };
+        private OnCompleteListener signupAction = new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                if (task.isSuccessful()) {
+                    // Sign up success, TODO go to next activity
+                    Log.d(TAG, "createUserWithEmail:success");
+                    startMainActivity();
+                    //in case an additional user record may be needed to store the username
+                    //currentUser.updateProfile(new UserProfileChangeRequest.Builder().setDisplayName(username).build());
+                } else {
+                    // If sign up fails, display a message to the user.
+                    Log.w(TAG, "createUserWithEmail:failure", task.getException());
+                    Toast.makeText(getActivity(), "Sign up failed. Please try again.",
                             Toast.LENGTH_SHORT).show();
                 }
             }
@@ -192,17 +213,21 @@ public class SignInSignUp extends AppCompatActivity {
                     }
                 });
             }
+
             //sign up fragment
             if (currentLayout == R.layout.sign_up_fragment) {
                 Button signUp = (Button) layout.findViewById(R.id.sign_up_button_id);
                 signUp.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+
                         String username = ((EditText) layout.findViewById(R.id.input_username_sign_up_id)).getText().toString().trim();
                         String email = ((EditText) layout.findViewById(R.id.input_email_sign_up_id)).getText().toString().toLowerCase().trim();
                         String password = ((EditText) layout.findViewById(R.id.input_passwd_sign_up_id)).getText().toString().trim();
                         String confirmPassword = ((EditText) layout.findViewById(R.id.input_confirm_passwd_sign_up_id)).getText().toString().trim();
+
                         Log.d(TAG, "SIGN_UP Clicked");
+
                         //check fields
                         if (username == "" || email == "" || password == "") {
                             Toast.makeText(getActivity(), "Sign up failed: empty fields",
@@ -216,25 +241,7 @@ public class SignInSignUp extends AppCompatActivity {
                             return;
                         }
 
-                        mAuth.createUserWithEmailAndPassword(email, password)
-                                .addOnCompleteListener(getActivity(), new OnCompleteListener<AuthResult>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<AuthResult> task) {
-                                        if (task.isSuccessful()) {
-                                            // Sign up success,
-                                            Log.d(TAG, "createUserWithEmail:success");
-                                            // Go to home activity
-                                            startMainActivity();
-                                            //in case an additional user record may be needed to store the username
-                                            //currentUser.updateProfile(new UserProfileChangeRequest.Builder().setDisplayName(username).build());
-                                        } else {
-                                            // If sign up fails, display a message to the user.
-                                            Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                                            Toast.makeText(getActivity(), "Sign up failed. Please try again.",
-                                                    Toast.LENGTH_SHORT).show();
-                                        }
-                                    }
-                                });
+                        UserController.signupUser(mAuth,password,email,username, Role.STUDENT,getActivity(),signupAction);
                     }
                 });
 

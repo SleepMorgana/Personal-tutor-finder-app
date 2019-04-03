@@ -1,7 +1,7 @@
-package com.example.toto.database.users;
+package com.example.toto.users;
 
-enum Role {
-    STUDENT("Student"),TUTOR("Tutor"),ADMIN("Admin");
+public enum Role {
+    STUDENT("STUDENT"),TUTOR("TUTOR"),ADMIN("ADMIN");
     private String text;
     Role(String text){
         this.text = text;

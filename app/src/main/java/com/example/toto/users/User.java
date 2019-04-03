@@ -1,11 +1,11 @@
-package com.example.toto.database.users;
+package com.example.toto.users;
 
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Observable;
-import java.util.Observer;
 
 public class User extends Observable {
     //combination of FirebaseUser and user from the `users` collection in firestore
@@ -15,6 +15,21 @@ public class User extends Observable {
     private String id;
 
 
+    public User(DocumentSnapshot user){
+        id = user.getId();
+        email = (String) user.getData().get("Email");
+        username = (String) user.getData().get("Username");
+        role = Role.valueOf((String)user.getData().get("Role"));
+    }
+
+    public User(String username,String email, Role role,String id){
+        this.username = username;
+        this.email = email;
+        this.id = id;
+        this.role = role;
+    }
+
+    //Only used at signIn and signUp time
     public User(FirebaseUser user){
         id = user.getUid();
         email = user.getEmail();
@@ -53,6 +68,7 @@ public class User extends Observable {
     }
 
     public Map<String, Object> marshal(){
+        //the Id must be fetch from the instance, in firestore document ids aren't in the map
         Map<String, Object> user = new HashMap<>();
         user.put("Username",username);
         user.put("Email",email);
