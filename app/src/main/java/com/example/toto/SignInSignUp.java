@@ -1,5 +1,6 @@
 package com.example.toto;
 
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -82,6 +83,13 @@ public class SignInSignUp extends AppCompatActivity {
         }
     }
 
+    public void startMainActivity(){
+        // Go to home activity
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
     @Override
     public void onStart() {
         super.onStart();
@@ -90,6 +98,7 @@ public class SignInSignUp extends AppCompatActivity {
         if (currentUser != null) {
             //user has already logged in recently
             //TODO go to next activity
+            //startMainActivity();
         }
     }
 
@@ -125,7 +134,7 @@ public class SignInSignUp extends AppCompatActivity {
                 if (task.isSuccessful()) {
                     // Sign in success, TODO go to next activity
                     Log.d(TAG, "signInUserWithEmail:success");
-
+                    startMainActivity();
                 } else {
                     // If sign in fails, display a message to the user.
                     Log.w(TAG, "signInUserWithEmail:failure", task.getException());
@@ -208,9 +217,11 @@ public class SignInSignUp extends AppCompatActivity {
                                     @Override
                                     public void onComplete(@NonNull Task<AuthResult> task) {
                                         if (task.isSuccessful()) {
-                                            // Sign up success, TODO go to next activity
+                                            // Sign up success,
                                             Log.d(TAG, "createUserWithEmail:success");
-                                            FirebaseUser currentUser = mAuth.getCurrentUser();
+
+                                            // Go to home activity
+                                            startMainActivity();
                                             //in case an additional user record may be needed to store the username
                                             //currentUser.updateProfile(new UserProfileChangeRequest.Builder().setDisplayName(username).build());
                                         } else {
@@ -226,6 +237,13 @@ public class SignInSignUp extends AppCompatActivity {
 
             }
             return layout;
+        }
+
+        private void startMainActivity(){
+            // Go to home activity
+            Intent intent = new Intent(getActivity(), MainActivity.class);
+            startActivity(intent);
+            getActivity().finish();
         }
 
     }
