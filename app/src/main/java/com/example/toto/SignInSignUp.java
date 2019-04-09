@@ -19,9 +19,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
-import com.example.toto.users.User;
-import com.example.toto.users.UserController;
 import com.example.toto.users.Role;
 import com.example.toto.users.UserManager;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -198,11 +195,10 @@ public class SignInSignUp extends AppCompatActivity {
                 signIn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        String username = ((EditText) layout.findViewById(R.id.input_sign_in_username_id)).getText().toString().toLowerCase().trim();
+                        String email = ((EditText) layout.findViewById(R.id.input_sign_in_email)).getText().toString().toLowerCase().trim();
                         String password = ((EditText) layout.findViewById(R.id.passwd_input_sign_in_id)).getText().toString().trim();
                         Log.d(TAG, "SIGN_IN Clicked");
-                        //TODO we should use email instead of username
-                        UserManager.signinUser(mAuth,password,username,getActivity(),signinAction);
+                        UserManager.signinUser(mAuth,password,email,getActivity(),signinAction);
                     }
                 });
 

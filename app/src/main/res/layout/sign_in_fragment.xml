@@ -35,20 +35,18 @@
         app:layout_constraintGuide_percent="0.1" />
 
     <TextView
-        android:id="@+id/username_sign_in_id"
+        android:id="@+id/email_sign_in_id"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:text="@string/username_txt"
+        android:text="@string/email_txt"
         app:layout_constraintEnd_toStartOf="@+id/guideline2"
         app:layout_constraintStart_toStartOf="@+id/guideline"
         app:layout_constraintTop_toTopOf="@+id/guideline4" />
 
     <EditText
-        android:id="@+id/input_sign_in_username_id"
+        android:id="@+id/input_sign_in_email"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -56,11 +54,11 @@
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:ems="10"
-        android:hint="@string/your_username_txt"
+        android:hint="@string/email_address_txt"
         android:inputType="textPersonName"
         app:layout_constraintEnd_toStartOf="@+id/guideline2"
         app:layout_constraintStart_toStartOf="@+id/guideline"
-        app:layout_constraintTop_toBottomOf="@+id/username_sign_in_id"
+        app:layout_constraintTop_toBottomOf="@+id/email_sign_in_id"
         android:theme="@style/inputFieldHighlight"/>
 
     <TextView
@@ -75,7 +73,7 @@
         android:text="@string/password_txt"
         app:layout_constraintEnd_toStartOf="@+id/guideline2"
         app:layout_constraintStart_toStartOf="@+id/guideline"
-        app:layout_constraintTop_toBottomOf="@+id/input_sign_in_username_id" />
+        app:layout_constraintTop_toBottomOf="@+id/input_sign_in_email" />
 
     <EditText
         android:id="@+id/passwd_input_sign_in_id"

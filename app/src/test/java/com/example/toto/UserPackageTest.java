@@ -74,7 +74,7 @@ public class UserPackageTest implements Executor {
         //User user = new User("student-1","example@gmail.com", Role.STUDENT,"id-1");
 
         //SplashActivity activity = Robolectric.setupActivity(SplashActivity.class);
-        
+
         //FirebaseApp.initializeApp(context, new FirebaseOptions.Builder().)
         //Activity activity = new TestActivity();
         //database instance

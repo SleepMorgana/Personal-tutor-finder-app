@@ -4,7 +4,6 @@ package com.example.toto.users;
 import com.example.toto.interfaces.DatabaseHelper;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 public class UserDatabaseHelper extends DatabaseHelper<User> {
     private static final String COLLECTION_NAME = "app_users";
