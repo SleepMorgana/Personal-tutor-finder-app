@@ -13,7 +13,6 @@ public class SplashActivity extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
-
         //At the moment we aren't performing any checks just sleeping
         new Thread() {
             @Override
@@ -22,7 +21,7 @@ public class SplashActivity extends Activity {
                     super.run();
                     sleep(2000);  //Delay of 2 seconds
                 } catch (Exception e) {
-                    Toast.makeText(getApplicationContext(), "There were some issues loading the application, please try again",
+                    Toast.makeText(getApplicationContext(), "There were some issues loading the application, please try again later",
                             Toast.LENGTH_SHORT).show();
                 } finally {
                     Intent intent = new Intent(getApplicationContext(),SignInSignUp.class);

@@ -1,5 +1,6 @@
 package com.example.toto.users;
 
+import com.example.toto.interfaces.Storable;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 
@@ -7,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Observable;
 
-public class User extends Observable {
+public class User extends Observable implements Storable {
     //combination of FirebaseUser and user from the `users` collection in firestore
     private String username;
     private String email;

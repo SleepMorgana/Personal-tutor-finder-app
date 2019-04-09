@@ -23,6 +23,7 @@ import android.widget.Toast;
 import com.example.toto.users.User;
 import com.example.toto.users.UserController;
 import com.example.toto.users.Role;
+import com.example.toto.users.UserManager;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -108,7 +109,7 @@ public class SignInSignUp extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        UserController.signOut();
+        UserManager.signOut();
     }
 
     /**
@@ -201,7 +202,7 @@ public class SignInSignUp extends AppCompatActivity {
                         String password = ((EditText) layout.findViewById(R.id.passwd_input_sign_in_id)).getText().toString().trim();
                         Log.d(TAG, "SIGN_IN Clicked");
                         //TODO we should use email instead of username
-                        UserController.signinUser(mAuth,password,username,getActivity(),signinAction);
+                        UserManager.signinUser(mAuth,password,username,getActivity(),signinAction);
                     }
                 });
 
@@ -241,7 +242,7 @@ public class SignInSignUp extends AppCompatActivity {
                             return;
                         }
 
-                        UserController.signupUser(mAuth,password,email,username, Role.STUDENT,getActivity(),signupAction);
+                        UserManager.signupUser(mAuth,password,email,username, Role.STUDENT,getActivity(),signupAction);
                     }
                 });
 
