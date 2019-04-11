@@ -17,9 +17,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.RadioButton;
 import android.widget.Toast;
-
+import com.example.toto.users.Role;
+import com.example.toto.users.UserManager;
+import com.example.toto.utils.Util;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -102,6 +106,12 @@ public class SignInSignUp extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        UserManager.signOut();
+    }
+
     /**
      * Creates the fragments and sets it to ViewPager
      */
@@ -124,7 +134,7 @@ public class SignInSignUp extends AppCompatActivity {
         /**
          * The fragment argument representing the section number for this
          * fragment.
-         * TODO we may want to declare vars for the differnt error messages
+         * TODO we may want to declare vars for the different error messages
          */
         private static final String ARG_LAYOUT = "layout";
         private final String TAG = "TUTOR_APP";
@@ -138,8 +148,23 @@ public class SignInSignUp extends AppCompatActivity {
                 } else {
                     // If sign in fails, display a message to the user.
                     Log.w(TAG, "signInUserWithEmail:failure", task.getException());
-                    Toast.makeText(getActivity(), "Authentication failed.Please try again.",
-                            Toast.LENGTH_SHORT).show();
+                    Util.printToast(getActivity(), "Authentication failed.Please try again.",Toast.LENGTH_SHORT);
+                }
+            }
+        };
+        private OnCompleteListener signupAction = new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                if (task.isSuccessful()) {
+                    // Sign up success, TODO go to next activity
+                    Log.d(TAG, "createUserWithEmail:success");
+                    startMainActivity();
+                    //in case an additional user record may be needed to store the username
+                    //currentUser.updateProfile(new UserProfileChangeRequest.Builder().setDisplayName(username).build());
+                } else {
+                    // If sign up fails, display a message to the user.
+                    Log.w(TAG, "createUserWithEmail:failure", task.getException());
+                    Util.printToast(getActivity(), "Sign up failed. Please try again.",Toast.LENGTH_SHORT);
                 }
             }
         };
@@ -171,12 +196,10 @@ public class SignInSignUp extends AppCompatActivity {
                 signIn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        String username = ((EditText) layout.findViewById(R.id.input_sign_in_username_id)).getText().toString().toLowerCase().trim();
+                        String email = ((EditText) layout.findViewById(R.id.input_sign_in_email)).getText().toString().toLowerCase().trim();
                         String password = ((EditText) layout.findViewById(R.id.passwd_input_sign_in_id)).getText().toString().trim();
                         Log.d(TAG, "SIGN_IN Clicked");
-                        //TODO we should use email instead of username
-                        mAuth.signInWithEmailAndPassword(username, password)
-                                .addOnCompleteListener(getActivity(), signinAction);
+                        UserManager.signinUser(mAuth,password,email,getActivity(),signinAction);
                     }
                 });
 
@@ -188,53 +211,65 @@ public class SignInSignUp extends AppCompatActivity {
                     }
                 });
             }
+
             //sign up fragment
             if (currentLayout == R.layout.sign_up_fragment) {
                 Button signUp = (Button) layout.findViewById(R.id.sign_up_button_id);
+                RadioButton studentRadioButton = (RadioButton) layout.findViewById(R.id.radioButton_student_id);
+                RadioButton tutorRadioButton = (RadioButton) layout.findViewById(R.id.radioButton_tutor_id);
+                final Role[] role = {null};
+
+
                 signUp.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+
                         String username = ((EditText) layout.findViewById(R.id.input_username_sign_up_id)).getText().toString().trim();
                         String email = ((EditText) layout.findViewById(R.id.input_email_sign_up_id)).getText().toString().toLowerCase().trim();
                         String password = ((EditText) layout.findViewById(R.id.input_passwd_sign_up_id)).getText().toString().trim();
                         String confirmPassword = ((EditText) layout.findViewById(R.id.input_confirm_passwd_sign_up_id)).getText().toString().trim();
+
                         Log.d(TAG, "SIGN_UP Clicked");
+
                         //check fields
                         if (username == "" || email == "" || password == "") {
-                            Toast.makeText(getActivity(), "Sign up failed: empty fields",
-                                    Toast.LENGTH_SHORT).show();
+                            Util.printToast(getActivity(), "Sign up failed: empty fields", Toast.LENGTH_SHORT);
                             return;
                         }
 
                         if (!password.equals(confirmPassword)) {
-                            Toast.makeText(getActivity(), "Sign up failed: password and confirmation mismatch",
-                                    Toast.LENGTH_SHORT).show();
+                            Util.printToast(getActivity(), "Sign up failed: password and confirmation mismatch", Toast.LENGTH_SHORT);
                             return;
                         }
 
-                        mAuth.createUserWithEmailAndPassword(email, password)
-                                .addOnCompleteListener(getActivity(), new OnCompleteListener<AuthResult>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<AuthResult> task) {
-                                        if (task.isSuccessful()) {
-                                            // Sign up success,
-                                            Log.d(TAG, "createUserWithEmail:success");
+                        if (role[0]==null){
+                            Util.printToast(getActivity(), "Sign up failed: no role was selected",Toast.LENGTH_SHORT);
+                            return;
+                        }
 
-                                            // Go to home activity
-                                            startMainActivity();
-                                            //in case an additional user record may be needed to store the username
-                                            //currentUser.updateProfile(new UserProfileChangeRequest.Builder().setDisplayName(username).build());
-                                        } else {
-                                            // If sign up fails, display a message to the user.
-                                            Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                                            Toast.makeText(getActivity(), "Sign up failed. Please try again.",
-                                                    Toast.LENGTH_SHORT).show();
-                                        }
-                                    }
-                                });
+                        UserManager.signupUser(mAuth,password,email,username, role[0],getActivity(),signupAction);
                     }
                 });
 
+                studentRadioButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        if (isChecked){
+                            role[0] = Role.STUDENT;
+                            Log.d(TAG, "Student role was selected");
+                        }
+                    }
+                });
+
+                tutorRadioButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        if (isChecked) {
+                            role[0] = Role.TUTOR;
+                            Log.d(TAG, "Tutor role was selected");
+                        }
+                    }
+                });
             }
             return layout;
         }
