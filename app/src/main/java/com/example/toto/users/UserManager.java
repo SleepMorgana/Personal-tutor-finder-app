@@ -1,12 +1,17 @@
 package com.example.toto.users;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
+import android.widget.EditText;
+import android.widget.Toast;
 
+import com.example.toto.ForgottenPasswordActivity;
 import com.example.toto.interfaces.DatabaseHelper;
+import com.example.toto.utils.Util;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -102,6 +107,33 @@ public class UserManager {
             throw new RuntimeException("Couldn't register observer for the current user");
         }
         currentUser.registerUserObserver(observer);
+    }
+
+    public static void resetPassword(FirebaseAuth firebaseAuth, final EditText email_input_field, final Context context) {
+        String email = email_input_field.getText().toString().toLowerCase().trim();
+
+        try {
+            firebaseAuth.sendPasswordResetEmail(email)
+                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            //Email address associated with an existing account
+                            if (task.isSuccessful()) {
+                                Util.printToast(context, "Password reset email sent to " +
+                                    email_input_field.getText().toString().toLowerCase().trim(), Toast.LENGTH_LONG);
+                                    email_input_field.setText(""); //Clear input field: visual feedback to user in addition to the toast msg
+                                //Email address not associated with an existing account
+                            } else {
+                                Util.printToast(context, task.getException().getMessage(), Toast.LENGTH_LONG);
+                            }
+                        }
+                    });
+
+        /*An illedgal argument exception is thrown when the email address which firebases checks to eventually
+          send a reset email is not filled ("Given String is empty or null")*/
+        } catch (java.lang.IllegalArgumentException e) {
+            Util.printToast(context, "Please, enter your email address",Toast.LENGTH_LONG);
+        }
     }
 
     //Just for testing, callback methods are difficult to unit test

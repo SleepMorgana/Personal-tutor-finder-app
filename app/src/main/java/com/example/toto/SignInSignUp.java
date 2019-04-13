@@ -208,6 +208,8 @@ public class SignInSignUp extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         Log.d(TAG, "FORGOT_PSSWD Clicked");
+                        Intent intent = new Intent(getActivity(), ForgottenPasswordActivity.class);
+                        startActivity(intent);
                     }
                 });
             }
