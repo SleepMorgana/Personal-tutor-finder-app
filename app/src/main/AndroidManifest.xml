@@ -11,14 +11,16 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ForgottenPasswordActivity"
-                  android:label="Forgot Password?"
-                  android:theme="@style/AppTheme"
-                  android:parentActivityName=".SignInSignUp" >
-                  <!-- The meta-data element is needed for versions lower than 4.1 -->
-                  <meta-data android:name="android.support.PARENT_ACTIVITY"
-                             android:value=".SignInSignUp" />
+        <activity
+            android:name=".ForgottenPasswordActivity"
+            android:label="Forgot Password?"
+            android:parentActivityName=".SignInSignUp"
+            android:theme="@style/AppTheme">
 
+            <!-- The meta-data element is needed for versions lower than 4.1 -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".SignInSignUp" />
         </activity>
         <activity
             android:name=".SignInSignUp"

@@ -20,4 +20,10 @@
     <string name="choose_username_txt">Choose a username</string>
     <string name="reset_psswd_instructions_txt">Enter the email address associated with your account to receive a password reset email:</string>
     <string name="reset_psswd_button_txt">Send reset email</string>
+    <string name="title_activity_main2">Main2Activity</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
 </resources>
