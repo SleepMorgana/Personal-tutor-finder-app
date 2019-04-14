@@ -22,8 +22,20 @@ public class ForgottenPasswordActivity extends AppCompatActivity {
     EditText input_email_edit_field;
 
     @Override
+    public boolean onNavigateUp(){
+        finish();
+        return true;
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //Showing back button
+        if(getActionBar() != null) { //null check
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);   //show back button
+        }
+
         setContentView(R.layout.activity_forgotten_password);
 
         reset_psswd_button = findViewById(R.id.reset_psswd_id);
