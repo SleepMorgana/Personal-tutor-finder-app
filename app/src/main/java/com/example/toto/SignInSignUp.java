@@ -1,5 +1,6 @@
 package com.example.toto;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -25,6 +26,8 @@ import com.example.toto.users.Role;
 import com.example.toto.users.UserManager;
 import com.example.toto.utils.Util;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -138,36 +141,48 @@ public class SignInSignUp extends AppCompatActivity {
          */
         private static final String ARG_LAYOUT = "layout";
         private final String TAG = "TUTOR_APP";
-        private OnCompleteListener signinAction = new OnCompleteListener<AuthResult>() {
+        static ProgressDialog mDialog;
+        private OnSuccessListener signinSuccess = new OnSuccessListener() {
             @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                if (task.isSuccessful()) {
-                    // Sign in success, TODO go to next activity
-                    Log.d(TAG, "signInUserWithEmail:success");
-                    startMainActivity();
-                } else {
-                    // If sign in fails, display a message to the user.
-                    Log.w(TAG, "signInUserWithEmail:failure", task.getException());
-                    Util.printToast(getActivity(), "Authentication failed.Please try again.",Toast.LENGTH_SHORT);
-                }
+            public void onSuccess(Object o) {
+                // Sign in success, TODO go to next activity
+                Log.d(TAG, "signInUserWithEmail:success");
+                mDialog.dismiss();
+                startMainActivity();
             }
         };
-        private OnCompleteListener signupAction = new OnCompleteListener<AuthResult>() {
+        private OnFailureListener signinFailure = new OnFailureListener() {
             @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                if (task.isSuccessful()) {
-                    // Sign up success, TODO go to next activity
-                    Log.d(TAG, "createUserWithEmail:success");
-                    startMainActivity();
-                    //in case an additional user record may be needed to store the username
-                    //currentUser.updateProfile(new UserProfileChangeRequest.Builder().setDisplayName(username).build());
-                } else {
-                    // If sign up fails, display a message to the user.
-                    Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                    Util.printToast(getActivity(), "Sign up failed. Please try again.",Toast.LENGTH_SHORT);
+            public void onFailure(@NonNull Exception e) {
+                // If sign in fails, display a message to the user.
+                Log.w(TAG, "signInUserWithEmail:failure", e);
+
+                if (e instanceof UnsupportedOperationException)
+                    Util.printToast(getActivity(), "Signin failed. Please try again.",Toast.LENGTH_SHORT);
+                if (e instanceof java.lang.InstantiationException) {
+                    Util.printToast(getActivity(), String.format("Signin failed: %s", e.getMessage()), Toast.LENGTH_SHORT);
                 }
+                mDialog.dismiss();
             }
         };
+        private OnSuccessListener signupSuccess = new OnSuccessListener() {
+            @Override
+            public void onSuccess(Object o) {
+                // Sign up success, go to next activity
+                Log.d(TAG, "createUserWithEmail:success");
+                Util.printToast(getActivity(), "Account has been successfully recorded!" +
+                        "\nPlease check verification email before sign in.", Toast.LENGTH_SHORT);
+            }
+        };
+        private OnFailureListener signupFailure = new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                // If sign up fails, display a message to the user.
+                Log.w(TAG, "createUserWithEmail:failure", e);
+                Util.printToast(getActivity(), "Sign up failed. Please try again.",Toast.LENGTH_SHORT);
+            }
+        };
+
 
         public PlaceholderFragment() {
         }
@@ -199,7 +214,9 @@ public class SignInSignUp extends AppCompatActivity {
                         String email = ((EditText) layout.findViewById(R.id.input_sign_in_email)).getText().toString().toLowerCase().trim();
                         String password = ((EditText) layout.findViewById(R.id.passwd_input_sign_in_id)).getText().toString().trim();
                         Log.d(TAG, "SIGN_IN Clicked");
-                        UserManager.signinUser(mAuth,password,email,getActivity(),signinAction);
+                        mDialog = Util.makeProgressDialog("","Loading..",getActivity());
+                        mDialog.show();
+                        UserManager.signinUser(mAuth,password,email,getActivity(),signinSuccess,signinFailure);
                     }
                 });
 
@@ -249,7 +266,7 @@ public class SignInSignUp extends AppCompatActivity {
                             return;
                         }
 
-                        UserManager.signupUser(mAuth,password,email,username, role[0],getActivity(),signupAction);
+                        UserManager.signupUser(mAuth,password,email,username, role[0],getActivity(),signupSuccess,signupFailure);
                     }
                 });
 

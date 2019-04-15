@@ -13,7 +13,10 @@ import com.example.toto.ForgottenPasswordActivity;
 import com.example.toto.interfaces.DatabaseHelper;
 import com.example.toto.utils.Util;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.ActionCodeSettings;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -28,7 +31,7 @@ public class UserManager {
     private static UserController currentUser;
     private static final DatabaseHelper<User> userDb = new UserDatabaseHelper();
 
-    private static void setCurrentUser(final User user) throws RuntimeException {
+    private static void setCurrentUser(final User user, final OnSuccessListener listener) throws RuntimeException {
         if (user == null)
             throw new RuntimeException("setCurrentUser user is null");
         //retrieve info from users collection
@@ -46,6 +49,7 @@ public class UserManager {
                         userDb.upsert(user);
                         Log.d("", "No such document");
                     }
+                    listener.onSuccess(currentUser);
                 } else {
                     Log.d("", "user query by Id failed: ", task.getException());
                 }
@@ -54,8 +58,9 @@ public class UserManager {
     }
 
     //When sign up or signIn the setCurrentUser method will be called to create the currentUser.
+    //Use UnsupportedOperationException for fatal errors,  Use InstantiationException for warnings
     public static void signupUser(FirebaseAuth firebaseAuth, String passwrd, String email, final String username, final Role role,
-                                  Activity ctx, final OnCompleteListener<AuthResult> listener) throws RuntimeException {
+                                  Activity ctx, final OnSuccessListener successListener, final OnFailureListener failureListener) throws RuntimeException {
         if (firebaseAuth == null)
             firebaseAuth = FirebaseAuth.getInstance();
 
@@ -65,20 +70,43 @@ public class UserManager {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            User user = new User(finalFirebaseAuth.getCurrentUser());
-                            user.setUsername(username);
-                            user.setRole(role);
-                            setCurrentUser(user);
+                            finalFirebaseAuth.getCurrentUser().sendEmailVerification()
+                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if (task.isSuccessful()){
+                                                //verification email was sent
+                                                User user = new User(finalFirebaseAuth.getCurrentUser());
+                                                user.setUsername(username);
+                                                user.setRole(role);
+                                                setCurrentUser(user, new OnSuccessListener() {
+                                                    @Override
+                                                    public void onSuccess(Object o) {
+                                                        if (successListener != null)
+                                                            successListener.onSuccess(null);
+                                                    }
+                                                });
+                                            }else{
+                                                //problems with sending verification email
+                                                if (failureListener != null)
+                                                    failureListener.onFailure(new UnsupportedOperationException("error sending the email verification"));
+                                            }
+                                        }
+                                    });
+                        }else{
+                            if (failureListener != null)
+                                failureListener.onFailure(new UnsupportedOperationException("error creating new database user"));
                         }
-                        if (listener != null)
-                            listener.onComplete(task);
                     }
                 });
 
     }
 
+    //Use UnsupportedOperationException for fatal errors
+    //Use InstantiationException for warnings
+    //TODO Users with ADMIN should be able to login without email verification
     public static void signinUser(FirebaseAuth firebaseAuth, String passwrd, String email,
-                                  Activity ctx, final OnCompleteListener<AuthResult> listener) {
+                                  Activity ctx, final OnSuccessListener successListener, final OnFailureListener failureListener) {
         if (firebaseAuth == null)
             firebaseAuth = FirebaseAuth.getInstance();
 
@@ -88,11 +116,29 @@ public class UserManager {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
+                            //user was retrieved and logged in
                             User user = new User(finalFirebaseAuth.getCurrentUser());
-                            setCurrentUser(user);
+                            //ATTENTION: setCurrentUser is an async operation, so immedietly after call
+                            //currentUser might be still null
+                            setCurrentUser(user, new OnSuccessListener() {
+                                @Override
+                                public void onSuccess(Object o) {
+                                    if (!finalFirebaseAuth.getCurrentUser().isEmailVerified() && !currentUser.getUser().getRole().equals(Role.ADMIN)){
+                                        //check if email was verified
+                                        if (failureListener != null)
+                                            failureListener.onFailure(new InstantiationException("warning email has not been verified yet"));
+                                        return;
+                                    }
+
+                                    if (successListener != null)
+                                        successListener.onSuccess(null);
+                                }
+                            });
+
+                        }else{
+                            if (failureListener != null)
+                                failureListener.onFailure(new UnsupportedOperationException("error during user sign in process"));
                         }
-                        if (listener != null)
-                            listener.onComplete(task);
                     }
                 });
     }
@@ -138,7 +184,7 @@ public class UserManager {
 
     //Just for testing, callback methods are difficult to unit test
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public static Future<User> signupUserFuture(FirebaseAuth firebaseAuth, String passwrd, String email, final String username, final Role role,
+    public static Future<User> signupUser(FirebaseAuth firebaseAuth, String passwrd, String email, final String username, final Role role,
                                            Executor ctx) {
         final CompletableFuture<User> completableFuture = new CompletableFuture<>();
         if (firebaseAuth == null)
@@ -153,7 +199,7 @@ public class UserManager {
                             User user = new User(finalFirebaseAuth.getCurrentUser());
                             user.setUsername(username);
                             user.setRole(role);
-                            setCurrentUser(user);
+                            setCurrentUser(user,null);
                             completableFuture.complete(user);
                         }else{
                             completableFuture.complete(null);

@@ -15,4 +15,8 @@ public class UserController {
         }
         user.addObserver(observer);
     }
+
+    public User getUser() {
+        return user;
+    }
 }

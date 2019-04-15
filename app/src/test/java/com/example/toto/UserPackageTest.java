@@ -80,7 +80,7 @@ public class UserPackageTest implements Executor {
         //database instance
         //FirebaseAuth auth = FirebaseAuth.getInstance(FirebaseApp.getInstance());
         ///UserController.signupUser(null,"foobar1",mNewUser.getEmail(),mNewUser.getUsername(),mNewUser.getRole(),activity,null);
-        Future<User> userFuture = UserManager.signupUserFuture(mMockFirebaseAuth,"foobar1",mNewUser.getEmail(),mNewUser.getUsername(),mNewUser.getRole(), this);
+        Future<User> userFuture = UserManager.signupUser(mMockFirebaseAuth,"foobar1",mNewUser.getEmail(),mNewUser.getUsername(),mNewUser.getRole(), this);
         //FirebaseApp.clearInstancesForTest();
         try {
             assertEquals(userFuture.get().getEmail(),mNewUser.getEmail());
