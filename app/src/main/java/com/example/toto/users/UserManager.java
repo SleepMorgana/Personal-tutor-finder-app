@@ -31,6 +31,7 @@ public class UserManager {
     private static UserController currentUser;
     private static final DatabaseHelper<User> userDb = new UserDatabaseHelper();
 
+    //acts as an initializer
     private static void setCurrentUser(final User user, final OnSuccessListener listener) throws RuntimeException {
         if (user == null)
             throw new RuntimeException("setCurrentUser user is null");
