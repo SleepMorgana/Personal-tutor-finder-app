@@ -22,7 +22,10 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.Toast;
+
+import com.example.toto.admin.AdminMainActivity;
 import com.example.toto.users.Role;
+import com.example.toto.users.User;
 import com.example.toto.users.UserManager;
 import com.example.toto.utils.Util;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -148,6 +151,10 @@ public class SignInSignUp extends AppCompatActivity {
                 // Sign in success, TODO go to next activity
                 Log.d(TAG, "signInUserWithEmail:success");
                 mDialog.dismiss();
+                if (((User) o).getRole().equals(Role.ADMIN)){
+                    startAdminMainActivity();
+                    return;
+                }
                 startMainActivity();
             }
         };
@@ -296,6 +303,13 @@ public class SignInSignUp extends AppCompatActivity {
         private void startMainActivity(){
             // Go to home activity
             Intent intent = new Intent(getActivity(), MainActivity.class);
+            startActivity(intent);
+            getActivity().finish();
+        }
+
+        private void startAdminMainActivity(){
+            // Go to home activity
+            Intent intent = new Intent(getActivity(), AdminMainActivity.class);
             startActivity(intent);
             getActivity().finish();
         }

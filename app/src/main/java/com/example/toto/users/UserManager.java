@@ -83,7 +83,7 @@ public class UserManager {
                                                     @Override
                                                     public void onSuccess(Object o) {
                                                         if (successListener != null)
-                                                            successListener.onSuccess(null);
+                                                            successListener.onSuccess(currentUser.getUser());
                                                     }
                                                 });
                                             }else{
@@ -131,7 +131,7 @@ public class UserManager {
                                     }
 
                                     if (successListener != null)
-                                        successListener.onSuccess(null);
+                                        successListener.onSuccess(currentUser.getUser());
                                 }
                             });
 
