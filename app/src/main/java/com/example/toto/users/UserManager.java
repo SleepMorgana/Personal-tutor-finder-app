@@ -10,6 +10,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.toto.interfaces.DatabaseHelper;
+import com.example.toto.sessions.Session;
 import com.example.toto.utils.Util;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -187,6 +188,31 @@ public class UserManager {
         } catch (java.lang.IllegalArgumentException e) {
             Util.printToast(context, "Please, enter your email address",Toast.LENGTH_LONG);
         }
+    }
+
+    public static void addSession(@NonNull String userId, final Session session,@NonNull final OnFailureListener listener){
+        if (session == null || userId.equals(""))
+            return;
+
+        userDb.getById(userId, new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful() && task.getResult()!=null){
+                    User user = new User(task.getResult());
+                    addSession(user,session);
+                }else{
+                    listener.onFailure(new IllegalStateException());
+                }
+            }
+        });
+    }
+
+    public static void addSession(User user, Session session){
+        //TODO add code, update user struct with new session
+    }
+
+    public static void addSession(Session session){
+        addSession(currentUser.getUser(), session);
     }
 
     //Just for testing, callback methods are difficult to unit test
