@@ -9,14 +9,12 @@ import android.util.Log;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.example.toto.ForgottenPasswordActivity;
 import com.example.toto.interfaces.DatabaseHelper;
 import com.example.toto.utils.Util;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.ActionCodeSettings;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -26,15 +24,15 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 
-//Use the UserManager to manage the state of the loggedin user
+//Use the UserManager to manage the state of the logged-in user
 public class UserManager {
     private static UserController currentUser;
     private static final DatabaseHelper<User> userDb = new UserDatabaseHelper();
 
     //acts as an initializer
-    private static void setCurrentUser(final User user, final OnSuccessListener listener) throws RuntimeException {
+    private static void initCurrentUser(final User user,@NonNull final OnSuccessListener listener,@NonNull final OnFailureListener failureListener) throws RuntimeException {
         if (user == null)
-            throw new RuntimeException("setCurrentUser user is null");
+            throw new RuntimeException("initialization user is null");
         //retrieve info from users collection
         userDb.getById(user.getId(), new OnCompleteListener<DocumentSnapshot>() {
             @Override
@@ -42,26 +40,36 @@ public class UserManager {
                 if (task.isSuccessful()) {
                     DocumentSnapshot document = task.getResult();
                     if (document.exists()) {
-                        Log.d("", "DocumentSnapshot data: " + document.getData());
+                        Log.d("TUTOR_APP", "DocumentSnapshot data: " + document.getData());
                         currentUser = new UserController(new User(document));
+                        listener.onSuccess(currentUser);
                     } else {
                         currentUser = new UserController(user);
                         //save the current user in the db, since it wasn't recorded yet
-                        userDb.upsert(user);
-                        Log.d("", "No such document");
+                        userDb.upsert(user, new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                listener.onSuccess(currentUser);
+                            }
+                        }, new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                failureListener.onFailure(e);
+                            }
+                        });
                     }
-                    listener.onSuccess(currentUser);
                 } else {
-                    Log.d("", "user query by Id failed: ", task.getException());
+                    failureListener.onFailure(new InstantiationException("error during user initialization"));
+                    Log.d("TUTOR_APP", "user query by Id failed: ", task.getException());
                 }
             }
         });
     }
 
-    //When sign up or signIn the setCurrentUser method will be called to create the currentUser.
+    //When sign up or signIn the initCurrentUser method will be called to create the currentUser.
     //Use UnsupportedOperationException for fatal errors,  Use InstantiationException for warnings
     public static void signupUser(FirebaseAuth firebaseAuth, String passwrd, String email, final String username, final Role role,
-                                  Activity ctx, final OnSuccessListener successListener, final OnFailureListener failureListener) throws RuntimeException {
+                                  Activity ctx,@NonNull final OnSuccessListener successListener,@NonNull final OnFailureListener failureListener) throws RuntimeException {
         if (firebaseAuth == null)
             firebaseAuth = FirebaseAuth.getInstance();
 
@@ -80,17 +88,15 @@ public class UserManager {
                                                 User user = new User(finalFirebaseAuth.getCurrentUser());
                                                 user.setUsername(username);
                                                 user.setRole(role);
-                                                setCurrentUser(user, new OnSuccessListener() {
+                                                initCurrentUser(user, new OnSuccessListener() {
                                                     @Override
                                                     public void onSuccess(Object o) {
-                                                        if (successListener != null)
-                                                            successListener.onSuccess(currentUser.getUser());
+                                                        successListener.onSuccess(currentUser.getUser());
                                                     }
-                                                });
+                                                },failureListener);
                                             }else{
                                                 //problems with sending verification email
-                                                if (failureListener != null)
-                                                    failureListener.onFailure(new UnsupportedOperationException("error sending the email verification"));
+                                                failureListener.onFailure(new UnsupportedOperationException("error sending the email verification"));
                                             }
                                         }
                                     });
@@ -105,9 +111,8 @@ public class UserManager {
 
     //Use UnsupportedOperationException for fatal errors
     //Use InstantiationException for warnings
-    //TODO Users with ADMIN should be able to login without email verification
     public static void signinUser(FirebaseAuth firebaseAuth, String passwrd, String email,
-                                  Activity ctx, final OnSuccessListener successListener, final OnFailureListener failureListener) {
+                                  Activity ctx,@NonNull final OnSuccessListener successListener,@NonNull final OnFailureListener failureListener) {
         if (firebaseAuth == null)
             firebaseAuth = FirebaseAuth.getInstance();
 
@@ -119,26 +124,23 @@ public class UserManager {
                         if (task.isSuccessful()) {
                             //user was retrieved and logged in
                             User user = new User(finalFirebaseAuth.getCurrentUser());
-                            //ATTENTION: setCurrentUser is an async operation, so immedietly after call
+                            //ATTENTION: initCurrentUser is an async operation, so immedietly after call
                             //currentUser might be still null
-                            setCurrentUser(user, new OnSuccessListener() {
+                            initCurrentUser(user, new OnSuccessListener() {
                                 @Override
                                 public void onSuccess(Object o) {
                                     if (!finalFirebaseAuth.getCurrentUser().isEmailVerified() && !currentUser.getUser().getRole().equals(Role.ADMIN)){
-                                        //check if email was verified
+                                        //check if email wasn't verified
                                         if (failureListener != null)
                                             failureListener.onFailure(new InstantiationException("warning email has not been verified yet"));
                                         return;
                                     }
-
-                                    if (successListener != null)
-                                        successListener.onSuccess(currentUser.getUser());
+                                    successListener.onSuccess(currentUser.getUser());
                                 }
-                            });
+                            },failureListener);
 
                         }else{
-                            if (failureListener != null)
-                                failureListener.onFailure(new UnsupportedOperationException("error during user sign in process"));
+                            failureListener.onFailure(new UnsupportedOperationException("error during user sign in process"));
                         }
                     }
                 });
@@ -147,6 +149,10 @@ public class UserManager {
     public static void signOut() {
         FirebaseAuth.getInstance().signOut();
         currentUser = null;
+    }
+
+    public static UserController getUserInstance(){
+        return currentUser;
     }
 
     public static void registerObserver(Observer observer) throws RuntimeException {
@@ -200,7 +206,7 @@ public class UserManager {
                             User user = new User(finalFirebaseAuth.getCurrentUser());
                             user.setUsername(username);
                             user.setRole(role);
-                            setCurrentUser(user,null);
+                            //setCurrentUser(user,null,null);
                             completableFuture.complete(user);
                         }else{
                             completableFuture.complete(null);

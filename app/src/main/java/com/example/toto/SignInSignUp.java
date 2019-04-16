@@ -150,6 +150,7 @@ public class SignInSignUp extends AppCompatActivity {
             public void onSuccess(Object o) {
                 // Sign in success, TODO go to next activity
                 Log.d(TAG, "signInUserWithEmail:success");
+                User currentUser = UserManager.getUserInstance().getUser();
                 mDialog.dismiss();
                 if (((User) o).getRole().equals(Role.ADMIN)){
                     startAdminMainActivity();
@@ -175,8 +176,9 @@ public class SignInSignUp extends AppCompatActivity {
         private OnSuccessListener signupSuccess = new OnSuccessListener() {
             @Override
             public void onSuccess(Object o) {
-                // Sign up success, go to next activity
+                // Sign up success, go to next activity, TODO add subject selection
                 Log.d(TAG, "createUserWithEmail:success");
+                User currentUser = UserManager.getUserInstance().getUser();
                 Util.printToast(getActivity(), "Account has been successfully recorded!" +
                         "\nPlease check verification email before sign in.", Toast.LENGTH_SHORT);
             }
@@ -218,8 +220,15 @@ public class SignInSignUp extends AppCompatActivity {
                 signIn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        String email = ((EditText) layout.findViewById(R.id.input_sign_in_email)).getText().toString().toLowerCase().trim();
-                        String password = ((EditText) layout.findViewById(R.id.passwd_input_sign_in_id)).getText().toString().trim();
+                        EditText ed1 = ((EditText) layout.findViewById(R.id.input_sign_in_email));
+                        String email = (ed1.getText()!=null)? ed1.getText().toString().toLowerCase().trim() : "";
+                        EditText ed2 = ((EditText) layout.findViewById(R.id.passwd_input_sign_in_id));
+                        String password = (ed2.getText()!=null)? ed2.getText().toString().toLowerCase().trim() : "";
+                        //verification input
+                        if (email.equals("") || password.equals("")) {
+                            Util.printToast(getActivity(), "Sign up failed: empty fields", Toast.LENGTH_SHORT);
+                            return;
+                        }
                         Log.d(TAG, "SIGN_IN Clicked");
                         mDialog = Util.makeProgressDialog("","Loading..",getActivity());
                         mDialog.show();
@@ -250,15 +259,19 @@ public class SignInSignUp extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
 
-                        String username = ((EditText) layout.findViewById(R.id.input_username_sign_up_id)).getText().toString().trim();
-                        String email = ((EditText) layout.findViewById(R.id.input_email_sign_up_id)).getText().toString().toLowerCase().trim();
-                        String password = ((EditText) layout.findViewById(R.id.input_passwd_sign_up_id)).getText().toString().trim();
-                        String confirmPassword = ((EditText) layout.findViewById(R.id.input_confirm_passwd_sign_up_id)).getText().toString().trim();
+                        EditText ed1 = ((EditText) layout.findViewById(R.id.input_username_sign_up_id));
+                        String username = (ed1.getText()!=null)? ed1.getText().toString().toLowerCase().trim() : "";
+                        EditText ed2 = ((EditText) layout.findViewById(R.id.input_email_sign_up_id));
+                        String email = (ed2.getText()!=null)? ed2.getText().toString().toLowerCase().trim() : "";
+                        EditText ed3 = ((EditText) layout.findViewById(R.id.input_passwd_sign_up_id));
+                        String password = (ed3.getText()!=null)? ed3.getText().toString().toLowerCase().trim() : "";
+                        EditText ed4 = ((EditText) layout.findViewById(R.id.input_confirm_passwd_sign_up_id));
+                        String confirmPassword = (ed4.getText()!=null)? ed4.getText().toString().toLowerCase().trim() : "";
 
                         Log.d(TAG, "SIGN_UP Clicked");
 
                         //check fields
-                        if (username == "" || email == "" || password == "") {
+                        if (username.equals("") || email.equals("") || password.equals("")) {
                             Util.printToast(getActivity(), "Sign up failed: empty fields", Toast.LENGTH_SHORT);
                             return;
                         }
