@@ -27,4 +27,9 @@
     <string name="nav_header_title">Android Studio</string>
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
+    <string name="placeholder">...</string>
+    <string name="accept_action">Accept</string>
+    <string name="decline_action">Decline</string>
+    <string name="tutor_admin_page">Tutors</string>
+    <string name="subject_admin_page">Subjects</string>
 </resources>
