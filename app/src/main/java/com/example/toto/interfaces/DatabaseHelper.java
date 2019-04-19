@@ -9,39 +9,58 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
+import com.google.firebase.firestore.QuerySnapshot;
 
 public abstract class DatabaseHelper<T extends Storable> {
     private static String COLLECTION_NAME;// collection where the entity is situated
-    private static FirebaseFirestore db;
+    protected static FirebaseFirestore db;
     private static String TAG;
 
     public DatabaseHelper(String collectionName, String tag){
         COLLECTION_NAME = collectionName;
         db = FirebaseFirestore.getInstance();
         TAG = tag;
+        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                .setTimestampsInSnapshotsEnabled(true)
+                .build();
+        firestore.setFirestoreSettings(settings);
     }
 
     //if the entity is present in the database update the record, else create new record
-    public void upsert(final T obj){
+    public void upsert(final T obj, OnSuccessListener<Void> successes, OnFailureListener failureListener){
+        if (obj.getId()==null) {
+            db.collection(COLLECTION_NAME)
+                    .document()
+                    .set(obj.marshal())
+                    .addOnSuccessListener(successes)
+                    .addOnFailureListener(failureListener);
+            return;
+        }
         db.collection(COLLECTION_NAME)
                 .document(obj.getId())
                 .set(obj.marshal())
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "DocumentSnapshot added with ID: " + obj.getId());
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error adding document", e);
-                    }
-                });
+                .addOnSuccessListener(successes)
+                .addOnFailureListener(failureListener);
     }
     //get entity by document id
     public void getById(String id, OnCompleteListener<DocumentSnapshot> callback){
         DocumentReference docRef = db.collection(COLLECTION_NAME).document(id);
         docRef.get().addOnCompleteListener(callback);
+    }
+
+    //delete single item
+    public void deleteById(String id, OnSuccessListener<Void> successes, OnFailureListener failureListener){
+        db.collection(COLLECTION_NAME).document(id).delete()
+                .addOnSuccessListener(successes)
+                .addOnFailureListener(failureListener);
+    }
+
+    //get item list from the collection
+    public void getAll(OnSuccessListener<QuerySnapshot> successListener, OnFailureListener failureListener){
+       db.collection(COLLECTION_NAME).get()
+               .addOnSuccessListener(successListener)
+               .addOnFailureListener(failureListener);
     }
 }

@@ -1,10 +1,12 @@
 package com.example.toto.users;
 
 import com.example.toto.interfaces.Storable;
+import com.example.toto.subjects.Subject;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 
