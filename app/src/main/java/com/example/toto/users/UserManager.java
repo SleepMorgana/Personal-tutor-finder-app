@@ -242,15 +242,16 @@ public class UserManager {
     }
 
     //Add subject to current user
-    public static void addSubject(Subject subject){
-
+    public static void addSubject(Subject subject, OnSuccessListener success, OnFailureListener error){
+        currentUser.getUser().addSubject(subject);
+        userDb.upsert(currentUser.getUser(),success,error);
     }
 
     //Remove subject from current user
-    public static void removeSubject(Subject subject){
-
+    public static void removeSubject(Subject subject, OnSuccessListener success, OnFailureListener error){
+        currentUser.getUser().removeSubject(subject);
+        userDb.upsert(currentUser.getUser(),success,error);
     }
-
     /*
         ADMIN COMMANDS
      */
