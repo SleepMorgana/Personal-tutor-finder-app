@@ -7,31 +7,20 @@ import android.widget.TextView;
 
 import com.example.toto.R;
 import com.example.toto.utils.ListViewItem;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 
 public class UserItemView extends ListViewItem<User> {
     private View mView;
+    private OnSuccessListener button1Action;// button action is successful
+    private OnSuccessListener button2Action;
 
 
-    //Event<User> event;
-
-//    private final View.OnClickListener clickListener = new View.OnClickListener() {
-//        @Override
-//        public void onClick(View view) {
-//            //record like
-//            element.setLike(!element.isLike());
-//            event.hasChanged();
-//            if (element.isLike())
-//                likeButton.setImageBitmap(BitmapFactory.decodeResource(Resources.getSystem(),R.mipmap.like_true));
-//            else
-//                likeButton.setImageBitmap(BitmapFactory.decodeResource(Resources.getSystem(),R.mipmap.like));
-//        }
-//    };
-
-    public UserItemView(Context context, User user, int layout) {
+    public UserItemView(Context context, User user, int layout, OnSuccessListener action1, OnSuccessListener action2) {
         super(context,user,layout);
-//        event = new Event<>();
-//        event.addObserver(new LikeEventHandler(meme,null));
+        this.button1Action = action1;
+        this.button2Action = action2;
     }
 
     @Override
@@ -52,13 +41,13 @@ public class UserItemView extends ListViewItem<User> {
             acceptButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    //change status in user model
+                    button1Action.onSuccess(element);
                 }
             });
             declineButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    //change status
+                    button2Action.onSuccess(element);
                 }
             });
         }

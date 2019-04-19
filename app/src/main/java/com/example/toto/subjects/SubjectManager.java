@@ -10,6 +10,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 public class SubjectManager {
     private static final SubjectDatabaseHelper db = new SubjectDatabaseHelper();
 
+    //create and updates
     public static void addNewSubject(Subject subject,@NonNull final OnSuccessListener<Void> successListener,@NonNull final OnFailureListener failureListener){
         if (subject==null){
             failureListener.onFailure(new NullPointerException("subject instance is null"));

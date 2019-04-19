@@ -115,7 +115,6 @@ public class SignInSignUp extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        UserManager.signOut();
     }
 
     /**
@@ -150,7 +149,6 @@ public class SignInSignUp extends AppCompatActivity {
             public void onSuccess(Object o) {
                 // Sign in success, TODO go to next activity
                 Log.d(TAG, "signInUserWithEmail:success");
-                User currentUser = UserManager.getUserInstance().getUser();
                 mDialog.dismiss();
                 if (((User) o).getRole().equals(Role.ADMIN)){
                     startAdminMainActivity();
@@ -178,7 +176,6 @@ public class SignInSignUp extends AppCompatActivity {
             public void onSuccess(Object o) {
                 // Sign up success, go to next activity, TODO add subject selection
                 Log.d(TAG, "createUserWithEmail:success");
-                User currentUser = UserManager.getUserInstance().getUser();
                 Util.printToast(getActivity(), "Account has been successfully recorded!" +
                         "\nPlease check verification email before sign in.", Toast.LENGTH_SHORT);
             }
