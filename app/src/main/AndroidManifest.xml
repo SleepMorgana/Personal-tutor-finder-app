@@ -12,6 +12,29 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
+            android:name=".StudentProfileEditActivity"
+            android:label="Edit My Profile"
+            android:parentActivityName=".StudentProfileActivity"
+            android:theme="@style/AppTheme">
+
+            <!-- The meta-data element is needed for versions lower than 4.1 -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".StudentProfileActivity" />
+        </activity>
+        <activity
+            android:name=".StudentProfileActivity"
+            android:label="My Profile"
+            android:parentActivityName=".MainActivityStudent"
+            android:theme="@style/AppTheme">
+
+            <!-- The meta-data element is needed for versions lower than 4.1 -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivityStudent" />
+        </activity>
+        <activity android:name=".MainActivityTutor" />
+        <activity
             android:name=".ForgottenPasswordActivity"
             android:label="Forgot Password?"
             android:parentActivityName=".SignInSignUp"
@@ -33,7 +56,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MainActivity"
+            android:name=".MainActivityStudent"
             android:label="@string/title_activity_main"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>

@@ -28,16 +28,14 @@ import com.example.toto.users.Role;
 import com.example.toto.users.User;
 import com.example.toto.users.UserManager;
 import com.example.toto.utils.Util;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class SignInSignUp extends AppCompatActivity {
     private static FirebaseAuth mAuth; // firebase authenticator
@@ -70,14 +68,14 @@ public class SignInSignUp extends AppCompatActivity {
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);*/
 
 
-        mTabLayout = (TabLayout) findViewById(R.id.tabs);
+        mTabLayout = findViewById(R.id.tabs);
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.container);
+        mViewPager = findViewById(R.id.container);
         populateViewPager();
     }
 
@@ -95,7 +93,7 @@ public class SignInSignUp extends AppCompatActivity {
 
     public void startMainActivity(){
         // Go to home activity
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, MainActivityStudent.class);
         startActivity(intent);
         finish();
     }
@@ -115,7 +113,6 @@ public class SignInSignUp extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        UserManager.signOut();
     }
 
     /**
@@ -151,11 +148,23 @@ public class SignInSignUp extends AppCompatActivity {
                 // Sign in success, TODO go to next activity
                 Log.d(TAG, "signInUserWithEmail:success");
                 mDialog.dismiss();
+                // Sucessfully signed in user is an admin -> Go to the admin home page
                 if (((User) o).getRole().equals(Role.ADMIN)){
                     startAdminMainActivity();
                     return;
+                // Sucessfully signed in user is a student -> Go to the student home page
+                } else if (((User) o).getRole().equals(Role.STUDENT)){
+                    Intent intent = new Intent(getActivity(), MainActivityStudent.class);
+                    intent.putExtra("myCurrentUser", (User) o);
+                    startActivity(intent);
+                // Sucessfully signed in user is a tutor -> Go to the tutor home page
+                } else if (((User) o).getRole().equals(Role.TUTOR)){
+                    Intent intent = new Intent(getActivity(), MainActivityTutor.class);
+                    intent.putExtra("myCurrentUser", (User) o);
+                    startActivity(intent);
                 }
-                startMainActivity();
+                Objects.requireNonNull(getActivity()).finish();
+
             }
         };
         private OnFailureListener signinFailure = new OnFailureListener() {
@@ -175,7 +184,7 @@ public class SignInSignUp extends AppCompatActivity {
         private OnSuccessListener signupSuccess = new OnSuccessListener() {
             @Override
             public void onSuccess(Object o) {
-                // Sign up success, go to next activity
+                // Sign up success, go to next activity, TODO add subject selection
                 Log.d(TAG, "createUserWithEmail:success");
                 Util.printToast(getActivity(), "Account has been successfully recorded!" +
                         "\nPlease check verification email before sign in.", Toast.LENGTH_SHORT);
@@ -214,12 +223,19 @@ public class SignInSignUp extends AppCompatActivity {
 
             //sign in fragment
             if (currentLayout == R.layout.sign_in_fragment) {
-                Button signIn = (Button) layout.findViewById(R.id.sign_in_button_id);
+                Button signIn = layout.findViewById(R.id.sign_in_button_id);
                 signIn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        String email = ((EditText) layout.findViewById(R.id.input_sign_in_email)).getText().toString().toLowerCase().trim();
-                        String password = ((EditText) layout.findViewById(R.id.passwd_input_sign_in_id)).getText().toString().trim();
+                        EditText ed1 = layout.findViewById(R.id.input_sign_in_email);
+                        String email = (ed1.getText()!=null)? ed1.getText().toString().toLowerCase().trim() : "";
+                        EditText ed2 = layout.findViewById(R.id.passwd_input_sign_in_id);
+                        String password = (ed2.getText()!=null)? ed2.getText().toString().toLowerCase().trim() : "";
+                        //verification input
+                        if (email.equals("") || password.equals("")) {
+                            Util.printToast(getActivity(), "Sign in failed: empty fields", Toast.LENGTH_SHORT);
+                            return;
+                        }
                         Log.d(TAG, "SIGN_IN Clicked");
                         mDialog = Util.makeProgressDialog("","Loading..",getActivity());
                         mDialog.show();
@@ -227,7 +243,7 @@ public class SignInSignUp extends AppCompatActivity {
                     }
                 });
 
-                Button passButton = (Button) layout.findViewById(R.id.forgotten_passwd_id);
+                Button passButton = layout.findViewById(R.id.forgotten_passwd_id);
                 passButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -240,9 +256,9 @@ public class SignInSignUp extends AppCompatActivity {
 
             //sign up fragment
             if (currentLayout == R.layout.sign_up_fragment) {
-                Button signUp = (Button) layout.findViewById(R.id.sign_up_button_id);
-                RadioButton studentRadioButton = (RadioButton) layout.findViewById(R.id.radioButton_student_id);
-                RadioButton tutorRadioButton = (RadioButton) layout.findViewById(R.id.radioButton_tutor_id);
+                Button signUp = layout.findViewById(R.id.sign_up_button_id);
+                RadioButton studentRadioButton = layout.findViewById(R.id.radioButton_student_id);
+                RadioButton tutorRadioButton = layout.findViewById(R.id.radioButton_tutor_id);
                 final Role[] role = {null};
 
 
@@ -250,15 +266,19 @@ public class SignInSignUp extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
 
-                        String username = ((EditText) layout.findViewById(R.id.input_username_sign_up_id)).getText().toString().trim();
-                        String email = ((EditText) layout.findViewById(R.id.input_email_sign_up_id)).getText().toString().toLowerCase().trim();
-                        String password = ((EditText) layout.findViewById(R.id.input_passwd_sign_up_id)).getText().toString().trim();
-                        String confirmPassword = ((EditText) layout.findViewById(R.id.input_confirm_passwd_sign_up_id)).getText().toString().trim();
+                        EditText ed1 = layout.findViewById(R.id.input_username_sign_up_id);
+                        String username = (ed1.getText()!=null)? ed1.getText().toString().toLowerCase().trim() : "";
+                        EditText ed2 = layout.findViewById(R.id.input_email_sign_up_id);
+                        String email = (ed2.getText()!=null)? ed2.getText().toString().toLowerCase().trim() : "";
+                        EditText ed3 = layout.findViewById(R.id.input_passwd_sign_up_id);
+                        String password = (ed3.getText()!=null)? ed3.getText().toString().toLowerCase().trim() : "";
+                        EditText ed4 = layout.findViewById(R.id.input_confirm_passwd_sign_up_id);
+                        String confirmPassword = (ed4.getText()!=null)? ed4.getText().toString().toLowerCase().trim() : "";
 
                         Log.d(TAG, "SIGN_UP Clicked");
 
                         //check fields
-                        if (username == "" || email == "" || password == "") {
+                        if (username.equals("") || email.equals("") || password.equals("")) {
                             Util.printToast(getActivity(), "Sign up failed: empty fields", Toast.LENGTH_SHORT);
                             return;
                         }
@@ -300,18 +320,13 @@ public class SignInSignUp extends AppCompatActivity {
             return layout;
         }
 
-        private void startMainActivity(){
-            // Go to home activity
-            Intent intent = new Intent(getActivity(), MainActivity.class);
-            startActivity(intent);
-            getActivity().finish();
-        }
+
 
         private void startAdminMainActivity(){
             // Go to home activity
             Intent intent = new Intent(getActivity(), AdminMainActivity.class);
             startActivity(intent);
-            getActivity().finish();
+            Objects.requireNonNull(getActivity()).finish();
         }
 
     }

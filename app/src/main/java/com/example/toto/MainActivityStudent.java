@@ -1,9 +1,9 @@
 package com.example.toto;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
+
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -12,31 +12,66 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.example.toto.users.User;
+import com.example.toto.users.UserManager;
 
 //This is going to be used as the home activity of the application
-public class MainActivity extends AppCompatActivity
+public class MainActivityStudent extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setContentView(R.layout.activity_main_student);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+        final View headerView = navigationView.getHeaderView(0);
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        //Data sent from previous activity (i.e. currently logged-in user)
+        Intent intent = getIntent();
+        final User user = intent.getParcelableExtra("myCurrentUser");
+
+        /*By default the profile picture is a gender-neutral avatar. If the logged-in user doesn't have
+        a profile picture associated to his/her profile, this must be displayed instead of the default avatar*/
+        UserManager.getProfilePicture((ImageView) headerView.findViewById(R.id.profile_pic_id), this);
+
+        //Update navigation menu with the logged-in user's info
+        //Username
+        TextView text_view = headerView.findViewById(R.id.username_nav_id);
+        text_view.setText(user.getUsername());
+        //Email
+        text_view = headerView.findViewById(R.id.email_navigation_id);
+        text_view.setText(user.getEmail());
+
+        //Everytime the user clicks on the header of the navbar, he/she is redirected to its profile page
+        headerView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivityStudent.this, StudentProfileActivity.class);
+                //Data sent: currently logged-in user
+                intent.putExtra("myCurrentUser", user);
+                startActivity(intent);
+            }
+        });
+
+
+
+
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
     }
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -86,7 +121,7 @@ public class MainActivity extends AppCompatActivity
 
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }

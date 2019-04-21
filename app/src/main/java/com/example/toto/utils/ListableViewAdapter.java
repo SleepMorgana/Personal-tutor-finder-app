@@ -8,22 +8,23 @@ import android.widget.BaseAdapter;
 import com.example.toto.R;
 import com.example.toto.users.User;
 import com.example.toto.users.UserItemView;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.List;
 
 
-public class ListableViewAdapter<T> extends BaseAdapter {
+public abstract class ListableViewAdapter<T> extends BaseAdapter {
 
-    private Context context;
-    private List<T> data;
+    protected Context context;
+    protected List<T> data;
     //private ImageLoader imageLoader;
-    private ListViewItem viewItem;
-    private boolean isAdmin;
+    protected ListViewItem viewItem;
 
-    public ListableViewAdapter(Context a, List<T> d, boolean isAdmin){
+
+    public ListableViewAdapter(Context a, List<T> d){
         context=a;
         data=d;
-        this.isAdmin = isAdmin;
 //        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(context)
 //                .build();
 //        imageLoader = ImageLoader.getInstance();
@@ -49,12 +50,7 @@ public class ListableViewAdapter<T> extends BaseAdapter {
 
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
-        if (data.size()>0) {
-            if (data.get(0) instanceof User && isAdmin)
-                return new UserItemView(context, (User) data.get(i), R.layout.user_admin_item_layout).getView();
-            //add other cases
-            return null;
-        }
+        //MUST BE IMPLEMENTED
         return null;
     }
 }
