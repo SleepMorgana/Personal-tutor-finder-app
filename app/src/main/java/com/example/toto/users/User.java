@@ -5,6 +5,8 @@ import android.os.Parcelable;
 
 import com.example.toto.interfaces.Storable;
 import com.example.toto.sessions.Status;
+import com.example.toto.sessions.Status;
+import com.example.toto.subjects.Subject;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 
@@ -19,6 +21,7 @@ public class User extends Observable implements Storable, Parcelable {
     private Role role;
     private String id;
     private Status status; // for tutors
+    private Map<String,Subject> subjects = new HashMap<>();
 
 
     public User(DocumentSnapshot user){
@@ -28,6 +31,9 @@ public class User extends Observable implements Storable, Parcelable {
         role = Role.valueOf((String)user.getData().get("Role"));
         if (role.equals(Role.TUTOR))
             status = Status.valueOf((String)user.getData().get("Status"));
+        subjects = (Map<String, Subject>) user.getData().get("Subjects");
+        if (subjects == null)
+            subjects = new HashMap<>();
     }
 
     public User(String username,String email, Role role,String id, Status status){
@@ -65,6 +71,24 @@ public class User extends Observable implements Storable, Parcelable {
         setChanged();
     }
 
+    public void setSubjects(Map<String, Subject> subjects) {
+        this.subjects = subjects;
+    }
+
+    public void addSubject(Subject s){
+        if (!subjects.containsKey(s.getId())){
+            subjects.put(s.getId(),s);
+            setChanged();
+        }
+    }
+
+    public void removeSubject(Subject s){
+        if (subjects.containsKey(s.getId())){
+            subjects.remove(s.getId());
+            setChanged();
+        }
+    }
+
     public Role getRole() {
         return role;
     }
@@ -85,6 +109,10 @@ public class User extends Observable implements Storable, Parcelable {
         return status;
     }
 
+    public Map<String, Subject> getSubjects() {
+        return subjects;
+    }
+
     public Map<String, Object> marshal(){
         //the Id must be fetch from the instance, in firestore document ids aren't in the map
         Map<String, Object> user = new HashMap<>();
@@ -93,8 +121,17 @@ public class User extends Observable implements Storable, Parcelable {
         user.put("Role",role.toString());
         if (role.equals(Role.TUTOR))
             user.put("Status", status.toString());
+        user.put("Subjects",flatten(subjects));
 
         return user;
+    }
+
+    private Map<String,Object> flatten(Map<String,Subject> map){
+        Map<String,Object> newMap = new HashMap<>();
+        for(Map.Entry<String, Subject> entry : map.entrySet()) {
+            newMap.put(entry.getKey(), ((Subject)entry.getValue()).marshal());
+        }
+        return newMap;
     }
 
 

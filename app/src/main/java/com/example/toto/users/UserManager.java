@@ -268,13 +268,16 @@ public class UserManager {
     }
 
     //Add subject to current user
-    public static void addSubject(Subject subject){
-
+    public static void addSubject(Subject subject, OnSuccessListener success, OnFailureListener error){
+        currentUser.getUser().addSubject(subject);
+        userDb.upsert(currentUser.getUser(),success,error);
     }
 
-    //Remove subject from current user
-    public static void removeSubject(Subject subject){
 
+    //Remove subject from current user
+    public static void removeSubject(Subject subject, OnSuccessListener success, OnFailureListener error){
+        currentUser.getUser().removeSubject(subject);
+        userDb.upsert(currentUser.getUser(),success,error);
     }
 
     //
@@ -337,7 +340,7 @@ public class UserManager {
     //Just for testing, callback methods are difficult to unit test
     @RequiresApi(api = Build.VERSION_CODES.N)
     public static Future<User> signupUser(FirebaseAuth firebaseAuth, String passwrd, String email, final String username, final Role role,
-                                           Executor ctx) {
+                                          Executor ctx) {
         final CompletableFuture<User> completableFuture = new CompletableFuture<>();
         if (firebaseAuth == null)
             firebaseAuth = FirebaseAuth.getInstance();
