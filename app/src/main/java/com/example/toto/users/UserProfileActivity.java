@@ -16,11 +16,14 @@ import android.widget.TextView;
 import com.alphabetik.Alphabetik;
 import com.example.toto.R;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 
 public class UserProfileActivity extends AppCompatActivity{
 
     private static User user;
-    //Implement your data as you prefer, but sort it.
     private ListView listView;
 
     @Override
@@ -77,19 +80,13 @@ public class UserProfileActivity extends AppCompatActivity{
                 //Sent data: currently logged-in user
                 intent.putExtra("myCurrentUser", user);
                 startActivity(intent);
-                break;
             // Respond to the action bar's Up/Home button
             case android.R.id.home:
                 finish(); // close this activity and return to preview activity (if there is any)
-                break;
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public boolean onSupportNavigateUp() {
-        onBackPressed();
-        return true;
     }
 
     /**
@@ -137,16 +134,15 @@ public class UserProfileActivity extends AppCompatActivity{
             View alphabetScroller = findViewById(R.id.alphSectionIndex);
             alphabetScroller.setVisibility(View.INVISIBLE);
 
-        // Alphabetik implementation
+        // Alphabetik implementation & ListView population
         } else {
             Alphabetik alphabetik = findViewById(R.id.alphSectionIndex);
             listView = findViewById(R.id.listView); //Listview implementation, with SORTED list of DATA
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, orderedSubjects);
             listView.setAdapter(adapter);
 
-            //Set alphabet because the default one include special letter not present in the english alphabet (Ñ)
-            String[] alphabet = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O",
-                    "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
+            //Set alphabet relevant with the subjects' names
+            String[] alphabet = getCustomAlphabet(orderedSubjects);
             alphabetik.setAlphabet(alphabet);
 
             alphabetik.onSectionIndexClickListener(new Alphabetik.SectionIndexClickListener() {
@@ -159,5 +155,26 @@ public class UserProfileActivity extends AppCompatActivity{
                 }
             });
         }
+    }
+
+    /**
+     * Creates an ordered array of  unique letters corresponding to the letters used as first characters
+     * in the items name
+     * @param items Array of items name
+     * @return ordered array of  unique letters corresponding to the letters used as first characters
+     * in the items name
+     */
+    private String[] getCustomAlphabet(String[] items) {
+        Set<String> first_letters = new HashSet<>();
+        String[] res;
+
+        for (String item:items) {
+            first_letters.add(item.substring(0, 1).toUpperCase());
+        }
+
+        res = first_letters.toArray(new String[0]);
+        Arrays.sort(res);
+
+        return(res);
     }
 }
