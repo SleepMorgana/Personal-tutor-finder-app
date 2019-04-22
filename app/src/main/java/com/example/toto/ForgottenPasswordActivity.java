@@ -4,7 +4,9 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -22,21 +24,18 @@ public class ForgottenPasswordActivity extends AppCompatActivity {
     EditText input_email_edit_field;
 
     @Override
-    public boolean onNavigateUp(){
-        finish();
-        return true;
-    }
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        //Showing back button
-        if(getActionBar() != null) { //null check
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);   //show back button
-        }
-
         setContentView(R.layout.activity_forgotten_password);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        // add back arrow to toolbar
+        if (getSupportActionBar() != null){
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
 
         reset_psswd_button = findViewById(R.id.reset_psswd_id);
         mAuth = FirebaseAuth.getInstance(); //Initialize Firebase Auth
@@ -51,5 +50,17 @@ public class ForgottenPasswordActivity extends AppCompatActivity {
         });
 
 
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                finish(); // close this activity and return to preview activity (if there is any)
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

@@ -241,6 +241,29 @@ public class UserManager {
         });
     }
 
+    /*public static Bitmap getBitmap(final Context context, final String resourceId) {
+        final Bitmap[] my_image = new Bitmap[1];
+        StorageReference ref = FirebaseStorage.getInstance().getReference().child(resourceId);
+        try {
+            final File localFile = File.createTempFile("Images", "bmp");
+            ref.getFile(localFile).addOnSuccessListener(new OnSuccessListener< FileDownloadTask.TaskSnapshot >() {
+                @Override
+                public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                    my_image[0] = BitmapFactory.decodeFile(localFile.getAbsolutePath());
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return my_image[0];
+    }*/
+
     public static void addSession(@NonNull String userId, final Session session,@NonNull final OnFailureListener listener){
         if (session == null || userId.equals(""))
             return;

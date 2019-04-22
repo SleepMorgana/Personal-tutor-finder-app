@@ -1,4 +1,4 @@
-package com.example.toto;
+package com.example.toto.users.student;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,8 +15,10 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.toto.R;
 import com.example.toto.users.User;
 import com.example.toto.users.UserManager;
+import com.example.toto.users.UserProfileActivity;
 
 //This is going to be used as the home activity of the application
 public class MainActivityStudent extends AppCompatActivity
@@ -52,7 +54,7 @@ public class MainActivityStudent extends AppCompatActivity
         headerView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivityStudent.this, StudentProfileActivity.class);
+                Intent intent = new Intent(MainActivityStudent.this, UserProfileActivity.class);
                 //Data sent: currently logged-in user
                 intent.putExtra("myCurrentUser", user);
                 startActivity(intent);

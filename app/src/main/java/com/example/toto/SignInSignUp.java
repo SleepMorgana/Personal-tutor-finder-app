@@ -27,6 +27,8 @@ import com.example.toto.admin.AdminMainActivity;
 import com.example.toto.users.Role;
 import com.example.toto.users.User;
 import com.example.toto.users.UserManager;
+import com.example.toto.users.student.MainActivityStudent;
+import com.example.toto.users.tutor.MainActivityTutor;
 import com.example.toto.utils.Util;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;

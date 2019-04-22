@@ -50,6 +50,7 @@ dependencies {
     implementation 'de.hdodenhof:circleimageview:2.2.0'
     implementation 'com.github.bumptech.glide:glide:4.9.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
+    compile 'com.github.richimf:Alphabetik:1.0.3'
 }
 
 apply plugin: 'com.google.gms.google-services'

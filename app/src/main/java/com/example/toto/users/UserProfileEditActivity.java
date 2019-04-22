@@ -1,4 +1,4 @@
-package com.example.toto;
+package com.example.toto.users;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -8,15 +8,14 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.toto.users.User;
-import com.example.toto.users.UserManager;
+import com.example.toto.R;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -28,7 +27,7 @@ import com.google.firebase.storage.UploadTask;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
-public class StudentProfileEditActivity extends AppCompatActivity {
+public class UserProfileEditActivity extends AppCompatActivity {
 
     private ImageView profile_picture;
     private final int RESULT_LOAD_IMAGE = 10;
@@ -36,28 +35,24 @@ public class StudentProfileEditActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_student_profile_edit);
+        setContentView(R.layout.activity_user_profile_edit);
         ImageView upload_profile_picture = findViewById(R.id.upload_pic_button_id);
 
-        //Showing back button
-        if(getActionBar() != null) { //null check
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);   //show back button
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        // add back arrow to toolbar
+        if (getSupportActionBar() != null){
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
 
         //Data sent from previous activity (i.e. currently logged-in user)
         Intent intent = getIntent();
         User user = intent.getParcelableExtra("myCurrentUser");
 
-        //Update navigation menu with the logged-in user's info
-        //Username
-        TextView text_view = findViewById(R.id.username_profile_id);
-        text_view.setText(user.getUsername());
-        //Email
-        text_view = findViewById(R.id.email_profile_id);
-        text_view.setText(user.getEmail());
-        /*By default the profile picture is a gender-neutral avatar, unless he/she has uploaded his/her
-        own profile picture which must then be displayed instead of the default avatar */
-        UserManager.getProfilePicture((ImageView) findViewById(R.id.profile_picture_edit_id), this);
+        //Render the user's identity
+        updateUserIdentity(user);
 
         //User action: uploading a new profile picture
         upload_profile_picture.setOnClickListener(new View.OnClickListener() {
@@ -91,11 +86,11 @@ public class StudentProfileEditActivity extends AppCompatActivity {
 
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
-                Toast.makeText(StudentProfileEditActivity.this, "Something went wrong", Toast.LENGTH_LONG).show();
+                Toast.makeText(UserProfileEditActivity.this, "Something went wrong", Toast.LENGTH_LONG).show();
             }
 
         }else {
-            Toast.makeText(StudentProfileEditActivity.this, "You haven't picked Image",Toast.LENGTH_LONG).show();
+            Toast.makeText(UserProfileEditActivity.this, "You haven't picked Image",Toast.LENGTH_LONG).show();
         }
     }
 
@@ -105,8 +100,8 @@ public class StudentProfileEditActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             // Respond to the action bar's Up/Home button
             case android.R.id.home:
-                finish();
-                return true;
+                finish(); // close this activity and return to preview activity (if there is any)
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -129,14 +124,14 @@ public class StudentProfileEditActivity extends AppCompatActivity {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                             progressDialog.dismiss();
-                            Toast.makeText(StudentProfileEditActivity.this, "Uploaded", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(UserProfileEditActivity.this, "Uploaded", Toast.LENGTH_SHORT).show();
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
                             progressDialog.dismiss();
-                            Toast.makeText(StudentProfileEditActivity.this, "Failed "+e.getMessage(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(UserProfileEditActivity.this, "Failed "+e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     })
                     .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
@@ -149,4 +144,23 @@ public class StudentProfileEditActivity extends AppCompatActivity {
                     });
         }
     }
+
+    /**
+     * Render the current user's identity (i.e. username, email address, profile picture)
+     * @param populated_user current logged-in user
+     */
+    private void updateUserIdentity(User populated_user) {
+        /*By default the profile picture is a gender-neutral avatar, unless he/she has uploaded his/her
+        own profile picture which must then be displayed instead of the default avatar */
+        UserManager.getProfilePicture((ImageView) findViewById(R.id.profile_picture_edit_id), this);
+
+        //Update navigation menu with the logged-in user's info
+        //Username
+        TextView text_view = findViewById(R.id.username_profile_id);
+        text_view.setText(populated_user.getUsername());
+        //Email
+        text_view = findViewById(R.id.email_profile_id);
+        text_view.setText(populated_user.getEmail());
+    }
+
 }

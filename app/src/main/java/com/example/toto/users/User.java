@@ -1,5 +1,6 @@
 package com.example.toto.users;
 
+import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -10,6 +11,7 @@ import com.example.toto.subjects.Subject;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Observable;
@@ -111,6 +113,17 @@ public class User extends Observable implements Storable, Parcelable {
 
     public Map<String, Subject> getSubjects() {
         return subjects;
+    }
+
+    /**
+     * Return the alphabetically ordered list of the subjects a student (tutor) wishes to learn (teach)
+     * @return alphabetically ordered list of the subjects a student (tutor) wishes to learn (teach)
+     */
+    public String[] getOrderedSubjects() {
+        String[] res = subjects.keySet().toArray(new String[0]);
+        Arrays.sort(res);
+
+        return res;
     }
 
     public Map<String, Object> marshal(){
