@@ -9,6 +9,7 @@ import android.widget.CheckBox;
 
 import com.example.toto.R;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -17,10 +18,10 @@ import java.util.Map;
  */
 public class CheckboxArrayAdapter extends ArrayAdapter<String> {
     private final Context context;
-    private final String[] values;
+    private final List<String> values;
     private Map<String, Boolean> subject_map;
 
-    public CheckboxArrayAdapter(Context context, String[] values, Map<String, Boolean> subject_map) {
+    public CheckboxArrayAdapter(Context context, List<String> values, Map<String, Boolean> subject_map) {
         super(context, R.layout.checkboxrow, values);
         this.context = context;
         this.values = values;
@@ -33,8 +34,8 @@ public class CheckboxArrayAdapter extends ArrayAdapter<String> {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View rowView = inflater.inflate(R.layout.checkboxrow, parent, false);
         final CheckBox checkbox=(CheckBox)rowView.findViewById(R.id.checkBox);
-        checkbox.setText(values[position]);
-        if (subject_map.get(values[position])) {
+        checkbox.setText(values.get(position));
+        if (subject_map.get(values.get(position))) {
             checkbox.setChecked(true);
         }
 

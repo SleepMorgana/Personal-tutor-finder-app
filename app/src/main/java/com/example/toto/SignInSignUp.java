@@ -1,10 +1,16 @@
 package com.example.toto;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -23,6 +29,9 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.example.toto.admin.AdminMainActivity;
 import com.example.toto.users.Role;
 import com.example.toto.users.User;
@@ -34,6 +43,8 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,6 +67,7 @@ public class SignInSignUp extends AppCompatActivity {
      */
     private ViewPager mViewPager;
     private TabLayout mTabLayout;
+    private static Context contextSignInSignUp;
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
@@ -64,6 +76,9 @@ public class SignInSignUp extends AppCompatActivity {
         setContentView(R.layout.activity_sign_in_sign_up);
         //Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
+
+        //Get context
+        contextSignInSignUp = this;
 
         /*Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -146,27 +161,34 @@ public class SignInSignUp extends AppCompatActivity {
         static ProgressDialog mDialog;
         private OnSuccessListener signinSuccess = new OnSuccessListener() {
             @Override
-            public void onSuccess(Object o) {
+            public void onSuccess(final Object o) {
                 // Sign in success, TODO go to next activity
                 Log.d(TAG, "signInUserWithEmail:success");
                 mDialog.dismiss();
                 // Sucessfully signed in user is an admin -> Go to the admin home page
-                if (((User) o).getRole().equals(Role.ADMIN)){
+                if (((User) o).getRole().equals(Role.ADMIN)) {
                     startAdminMainActivity();
                     return;
-                // Sucessfully signed in user is a student -> Go to the student home page
-                } else if (((User) o).getRole().equals(Role.STUDENT)){
-                    Intent intent = new Intent(getActivity(), MainActivityStudent.class);
-                    intent.putExtra("myCurrentUser", (User) o);
-                    startActivity(intent);
-                // Sucessfully signed in user is a tutor -> Go to the tutor home page
-                } else if (((User) o).getRole().equals(Role.TUTOR)){
-                    Intent intent = new Intent(getActivity(), MainActivityTutor.class);
-                    intent.putExtra("myCurrentUser", (User) o);
-                    startActivity(intent);
+                } else {
+                    //Download profile picture if any as Bitmap and update the corresponding profile picture attribute in the current user
+                    FirebaseStorage.getInstance().getReference().
+                            child("images/profile_picture_" + FirebaseAuth.getInstance().getCurrentUser().getUid()).getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                        @Override
+                        public void onSuccess(byte[] bytes) {
+                            Bitmap bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                            UserManager.getUserInstance().getUser().setProfile_picture(bmp);
+                            startStudentorTutorMainActivity(contextSignInSignUp, (User) o);
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception exception) {
+                            /*No profile picture retrieved: continue to the next activity. A gender-neutral
+                            avatar will be displayed as a profile picture */
+                            startStudentorTutorMainActivity(contextSignInSignUp, (User) o);
+                        }
+                    });
                 }
                 Objects.requireNonNull(getActivity()).finish();
-
             }
         };
         private OnFailureListener signinFailure = new OnFailureListener() {
@@ -331,6 +353,32 @@ public class SignInSignUp extends AppCompatActivity {
             Objects.requireNonNull(getActivity()).finish();
         }
 
+        /**
+         * Go to students' main activity
+         */
+        private void startStudentMainActivity(Context context) {
+            Intent intent = new Intent(context, MainActivityStudent.class);
+            startActivity(intent);
+        }
+
+        /**
+         * Go to tutors' main activity
+         */
+        private void startTutorMainActivity(Context context) {
+            Intent intent = new Intent(context, MainActivityTutor.class);
+            startActivity(intent);
+        }
+
+        private void startStudentorTutorMainActivity(Context context, User my_user) {
+            // Sucessfully signed in user is a student -> Go to the student home page
+            if (my_user.getRole().equals(Role.STUDENT)) {
+                startStudentMainActivity(context);
+
+                // Sucessfully signed in user is a tutor -> Go to the tutor home page
+            } else if (my_user.getRole().equals(Role.TUTOR)) {
+                startTutorMainActivity(context);
+            }
+        }
     }
 
     /**

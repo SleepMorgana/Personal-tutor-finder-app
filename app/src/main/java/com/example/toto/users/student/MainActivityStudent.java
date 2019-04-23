@@ -1,24 +1,41 @@
 package com.example.toto.users.student;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.FutureTarget;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.example.toto.R;
 import com.example.toto.users.User;
 import com.example.toto.users.UserManager;
 import com.example.toto.users.UserProfileActivity;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+
+import java.util.concurrent.ExecutionException;
 
 //This is going to be used as the home activity of the application
 public class MainActivityStudent extends AppCompatActivity
@@ -34,13 +51,14 @@ public class MainActivityStudent extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         final View headerView = navigationView.getHeaderView(0);
 
-        //Data sent from previous activity (i.e. currently logged-in user)
-        Intent intent = getIntent();
-        final User user = intent.getParcelableExtra("myCurrentUser");
+        final  User user = UserManager.getUserInstance().getUser();
 
         /*By default the profile picture is a gender-neutral avatar. If the logged-in user doesn't have
         a profile picture associated to his/her profile, this must be displayed instead of the default avatar*/
-        UserManager.getProfilePicture((ImageView) headerView.findViewById(R.id.profile_pic_id), this);
+        if (user.getProfile_picture() != null) {
+            ImageView profile_pic_view = (ImageView) headerView.findViewById(R.id.profile_pic_id);
+            profile_pic_view.setImageBitmap(user.getProfile_picture());
+        }
 
         //Update navigation menu with the logged-in user's info
         //Username
@@ -55,8 +73,6 @@ public class MainActivityStudent extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivityStudent.this, UserProfileActivity.class);
-                //Data sent: currently logged-in user
-                intent.putExtra("myCurrentUser", user);
                 startActivity(intent);
             }
         });

@@ -14,18 +14,40 @@
         <activity
             android:name=".users.UserProfileEditActivity"
             android:label="Edit My Profile"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"
+            android:parentActivityName="com.example.toto.users.UserProfileActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.toto.users.UserProfileActivity" />
+
         </activity>
         <activity
             android:name=".users.UserProfileActivity"
             android:label="My Profile"
             android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
         <activity android:name=".users.tutor.MainActivityTutor" />
         <activity
             android:name=".ForgottenPasswordActivity"
             android:label="Forgot Password?"
             android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".SignInSignUp"

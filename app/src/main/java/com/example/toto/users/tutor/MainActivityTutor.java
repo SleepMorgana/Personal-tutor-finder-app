@@ -13,6 +13,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.toto.R;
+import com.example.toto.users.User;
+import com.example.toto.users.UserManager;
 
 //This is going to be used as the home activity of the application for tutors
 public class MainActivityTutor extends AppCompatActivity
@@ -25,9 +27,8 @@ public class MainActivityTutor extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         //setSupportActionBar(toolbar);
         Log.d("CECILE","Tutor");
-        /*Intent intent = getIntent();
-        User user = (User) intent.getParcelableExtra("myCurrentUser");
-        Log.d("CECILE", user.getUsername());
+        User user = UserManager.getUserInstance().getUser();
+        /*Log.d("CECILE", user.getUsername());
         Log.d("CECILE", user.getEmail());
         Log.d("CECILE", user.getId());
         Log.d("CECILE", user.getRole().toString());*/

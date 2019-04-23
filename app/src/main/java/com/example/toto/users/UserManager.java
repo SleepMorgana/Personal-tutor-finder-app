@@ -27,6 +27,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.util.Map;
 import java.util.Observer;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -241,29 +242,6 @@ public class UserManager {
         });
     }
 
-    /*public static Bitmap getBitmap(final Context context, final String resourceId) {
-        final Bitmap[] my_image = new Bitmap[1];
-        StorageReference ref = FirebaseStorage.getInstance().getReference().child(resourceId);
-        try {
-            final File localFile = File.createTempFile("Images", "bmp");
-            ref.getFile(localFile).addOnSuccessListener(new OnSuccessListener< FileDownloadTask.TaskSnapshot >() {
-                @Override
-                public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                    my_image[0] = BitmapFactory.decodeFile(localFile.getAbsolutePath());
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return my_image[0];
-    }*/
-
     public static void addSession(@NonNull String userId, final Session session,@NonNull final OnFailureListener listener){
         if (session == null || userId.equals(""))
             return;
@@ -296,6 +274,16 @@ public class UserManager {
         userDb.upsert(currentUser.getUser(),success,error);
     }
 
+    /**
+     * Add subjects to current user
+     * @param subjects Subjects to be added to the current user
+     * @param success Listener called when upsert task completed successfully
+     * @param error Listener called when upsert task was not successfully completed
+     */
+    public static void addSubjects(Map<String,Subject> subjects, OnSuccessListener success, OnFailureListener error){
+        currentUser.getUser().setSubjects(subjects);
+        userDb.upsert(currentUser.getUser(),success,error);
+    }
 
     //Remove subject from current user
     public static void removeSubject(Subject subject, OnSuccessListener success, OnFailureListener error){

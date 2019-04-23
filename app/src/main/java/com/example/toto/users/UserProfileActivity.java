@@ -18,12 +18,12 @@ import com.example.toto.R;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 
 public class UserProfileActivity extends AppCompatActivity{
 
-    private static User user;
     private ListView listView;
 
     @Override
@@ -40,19 +40,17 @@ public class UserProfileActivity extends AppCompatActivity{
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
 
-        //Data sent from previous activity (i.e. currently logged-in user)
-        Intent intent = getIntent();
-        user = intent.getParcelableExtra("myCurrentUser");
+        //Current user
+        User user = UserManager.getUserInstance().getUser();
 
         //Render the user's identity
         updateUserIdentity(user);
 
         //Render the user's subjects (learning needs for subjects vs tutoring subjects for tutors)
         renderSubjects(user);
-
     }
 
-    private int getPositionFromData(String character, String[] orderedData) {
+    private int getPositionFromData(String character, List<String> orderedData) {
         int position = 0;
         for (String s : orderedData) {
             String letter = "" + s.charAt(0);
@@ -75,10 +73,8 @@ public class UserProfileActivity extends AppCompatActivity{
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             // Edit button clicked, go to the edit profile activity
-            case R.id.editprofile_button_id:
+            case R.id.editprofile_button_id: //cf. menu folder
                 Intent intent = new Intent(UserProfileActivity.this, UserProfileEditActivity.class);
-                //Sent data: currently logged-in user
-                intent.putExtra("myCurrentUser", user);
                 startActivity(intent);
             // Respond to the action bar's Up/Home button
             case android.R.id.home:
@@ -96,7 +92,10 @@ public class UserProfileActivity extends AppCompatActivity{
     private void updateUserIdentity(User populated_user) {
         /*By default the profile picture is a gender-neutral avatar, unless he/she has uploaded his/her
         own profile picture which must then be displayed instead of the default avatar */
-        UserManager.getProfilePicture((ImageView) findViewById(R.id.profile_picture_view_id), this);
+        if (populated_user.getProfile_picture() != null) {
+            ImageView profile_pic_view = (ImageView) findViewById(R.id.profile_picture_view_id);
+            profile_pic_view.setImageBitmap(populated_user.getProfile_picture());
+        }
 
         //Update navigation menu with the logged-in user's info
         //Username
@@ -113,7 +112,7 @@ public class UserProfileActivity extends AppCompatActivity{
      */
     private void renderSubjects(User populated_user) {
         //Alphabetically ordered list of learning needs (student) or tutoring subjects (tutors)
-        final String[] orderedSubjects = populated_user.getOrderedSubjects();
+        final List<String> orderedSubjects = populated_user.getOrderedSubjects();
 
         // Title of the list depends on the role of the user
         TextView subject_list_title = findViewById(R.id.subject_list_name);
@@ -127,7 +126,7 @@ public class UserProfileActivity extends AppCompatActivity{
         }
 
         // Display instructions on how to add subjects if the user's subject list is empty
-        if (orderedSubjects.length == 0) {
+        if (orderedSubjects.size() == 0) {
             TextView instructions = findViewById(R.id.subjects_instructions_id);
             instructions.setText("You don't have specified any subjects yet. Please edit your profile to add subjects");
             //Hide alphabet scroller on the right side
@@ -160,11 +159,11 @@ public class UserProfileActivity extends AppCompatActivity{
     /**
      * Creates an ordered array of  unique letters corresponding to the letters used as first characters
      * in the items name
-     * @param items Array of items name
+     * @param items List of items name
      * @return ordered array of  unique letters corresponding to the letters used as first characters
      * in the items name
      */
-    private String[] getCustomAlphabet(String[] items) {
+    private String[] getCustomAlphabet(List<String> items) {
         Set<String> first_letters = new HashSet<>();
         String[] res;
 
@@ -172,7 +171,7 @@ public class UserProfileActivity extends AppCompatActivity{
             first_letters.add(item.substring(0, 1).toUpperCase());
         }
 
-        res = first_letters.toArray(new String[0]);
+        res = first_letters.toArray(new String[first_letters.size()]);
         Arrays.sort(res);
 
         return(res);

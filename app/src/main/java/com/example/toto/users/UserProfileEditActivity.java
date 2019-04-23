@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -19,11 +20,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alphabetik.Alphabetik;
+import com.example.toto.subjects.Subject;
+import com.example.toto.subjects.SubjectManager;
 import com.example.toto.utils.CheckboxArrayAdapter;
 import com.example.toto.R;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
@@ -33,6 +38,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -41,6 +47,7 @@ import java.util.Set;
 
 public class UserProfileEditActivity extends AppCompatActivity {
 
+    private User user;
     private ImageView profile_picture;
     private final int RESULT_LOAD_IMAGE = 10;
 
@@ -50,18 +57,21 @@ public class UserProfileEditActivity extends AppCompatActivity {
         setContentView(R.layout.activity_user_profile_edit);
         ImageView upload_profile_picture = findViewById(R.id.upload_pic_button_id);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
-        // add back arrow to toolbar
-        if (getSupportActionBar() != null){
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setDisplayShowHomeEnabled(true);
-        }
+        // my_child_toolbar is defined in the layout file
+        Toolbar myChildToolbar =
+                (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(myChildToolbar);
 
-        //Data sent from previous activity (i.e. currently logged-in user)
-        Intent intent = getIntent();
-        final User user = intent.getParcelableExtra("myCurrentUser");
+        // Get a support ActionBar corresponding to this toolbar
+        ActionBar ab = getSupportActionBar();
+
+        // Enable the Up button
+        ab.setDisplayHomeAsUpEnabled(true);
+
+
+        //Current user
+        user = UserManager.getUserInstance().getUser();
 
         //User action: uploading a new profile picture
         upload_profile_picture.setOnClickListener(new View.OnClickListener() {
@@ -77,50 +87,64 @@ public class UserProfileEditActivity extends AppCompatActivity {
         //Render the user's identity
         updateUserIdentity(user);
 
-        //String[] checked_subjects = user.getOrderedSubjects();
-        //String[] all_app_subjects; TODO get all subjects'name available in the app
-        String[] checked_subjects = {"English Literature", "Italian Language", "C++ Programming"};
-        final String[] all_app_subjects = {"English Literature", "Italian Language", "C++ Programming", "French Language",
-                "Electronic Systems", "Particle Physics", "Graph Theory", "Musicology", "Cryptography", "Mathematics",
-                "Databases", "Ancient Greek Philosophy", "Computer Architecture", "Operating Systems", "Machine Learning"};
-
-        //Populating a map (all subjects -> is(un)checked) for a user
-        Map<String, Boolean> mapping_user_subjects = populateMappingUserSubject(checked_subjects, all_app_subjects);
-
-        Arrays.sort(all_app_subjects); //Sort the list of all subjects (necessary for the alphabet scroller to work)
-
-        // Alphabetik implementation
-        Alphabetik alphabetik = findViewById(R.id.alphSectionIndex);
-        final ListView listView=(ListView)findViewById(R.id.listView);
-        final CheckboxArrayAdapter adapter = new CheckboxArrayAdapter(this, all_app_subjects, mapping_user_subjects);
-        listView.setAdapter(adapter);
-        listView.setItemsCanFocus(false);
-        listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE); //List allows multiple choices
-
-        //Set alphabet relevant with the subjects' names
-        String[] alphabet = getCustomAlphabet(all_app_subjects);
-        alphabetik.setAlphabet(alphabet);
-
-        alphabetik.onSectionIndexClickListener(new Alphabetik.SectionIndexClickListener() {
+        SubjectManager.listSubjects(new OnSuccessListener<QuerySnapshot>() {
             @Override
-            public void onItemClick(View view, int position, String character) {
-                listView.smoothScrollToPosition(getPositionFromData(character, all_app_subjects));
-            }
-        });
-
-        //User wants to save his/her changes
-        FloatingActionButton fab_save = (FloatingActionButton) findViewById (R.id.fab_save_id);
-        fab_save.setOnClickListener (new View.OnClickListener () {
-            @Override
-            public void onClick (View view) {
-                List<String> checked_subjects = new ArrayList<>();
-                Map<String, Boolean> updatedUserSubjectMap = adapter.getSubject_map();
-                for (Map.Entry<String, Boolean> entry : updatedUserSubjectMap.entrySet()) {
-                    if (entry.getValue()) {
-                        checked_subjects.add(entry.getKey());
-                    }
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                final ArrayList<String> all_app_subjects = new ArrayList();
+                for (DocumentSnapshot snapshot : queryDocumentSnapshots){
+                    Subject subject = new Subject(snapshot);
+                    all_app_subjects.add(subject.getName());
                 }
-                Log.d("CECILE", checked_subjects.toString());
+                //continue
+                //List<String> checked_subjects = user.getOrderedSubjects();
+                List<String> checked_subjects = new ArrayList<>();
+                checked_subjects.add("English Literature"); checked_subjects.add("Italian Language"); checked_subjects.add("C++ Programming");
+
+                //Populating a map (all subjects -> is(un)checked) for a user
+                Map<String, Boolean> mapping_user_subjects = populateMappingUserSubject(checked_subjects, all_app_subjects);
+
+                Collections.sort(all_app_subjects); //Sort the list of all subjects (necessary for the alphabet scroller to work)
+
+                // Alphabetik implementation
+                Alphabetik alphabetik = findViewById(R.id.alphSectionIndex);
+                final ListView listView=(ListView)findViewById(R.id.listView);
+                final CheckboxArrayAdapter adapter = new CheckboxArrayAdapter(UserProfileEditActivity.this, all_app_subjects, mapping_user_subjects);
+                listView.setAdapter(adapter);
+                listView.setItemsCanFocus(false);
+                listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE); //List allows multiple choices
+
+                //Set alphabet relevant with the subjects' names
+                String[] alphabet = getCustomAlphabet(all_app_subjects);
+                alphabetik.setAlphabet(alphabet);
+
+                alphabetik.onSectionIndexClickListener(new Alphabetik.SectionIndexClickListener() {
+                    @Override
+                    public void onItemClick(View view, int position, String character) {
+                        listView.smoothScrollToPosition(getPositionFromData(character, all_app_subjects));
+                    }
+                });
+
+                //User wants to save his/her changes
+                FloatingActionButton fab_save = (FloatingActionButton) findViewById (R.id.fab_save_id);
+                fab_save.setOnClickListener (new View.OnClickListener () {
+                    @Override
+                    public void onClick (View view) {
+                        List<String> checked_subjects = new ArrayList<>();
+                        Map<String, Boolean> updatedUserSubjectMap = adapter.getSubject_map();
+                        for (Map.Entry<String, Boolean> entry : updatedUserSubjectMap.entrySet()) {
+                            if (entry.getValue()) {
+                                checked_subjects.add(entry.getKey());
+                            }
+                        }
+
+                        Log.d("CECILE", checked_subjects.toString());
+                    }
+                });
+            }
+        }, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.d("CECILE", "FATAL");
             }
         });
     }
@@ -140,6 +164,9 @@ public class UserProfileEditActivity extends AppCompatActivity {
                 profile_picture.getLayoutParams().height = (int) getResources().getDimension(R.dimen.profile_pic_width);
                 profile_picture.getLayoutParams().height = (int) getResources().getDimension(R.dimen.profile_pic_height);
 
+                //Update profile picture attribute in the user object
+                user.setProfile_picture(selectedImage);
+
                 //Save the new current user's profile picture to Firestore
                 uploadImage(imageUri);
 
@@ -153,7 +180,7 @@ public class UserProfileEditActivity extends AppCompatActivity {
         }
     }
 
-    @Override
+   /* @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
         switch (item.getItemId()) {
@@ -164,7 +191,7 @@ public class UserProfileEditActivity extends AppCompatActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
+    }*/
 
     /**
      * Uploading a file (in this project a profile picture previously picked from the phone's Photos or Gallery app)
@@ -212,7 +239,10 @@ public class UserProfileEditActivity extends AppCompatActivity {
     private void updateUserIdentity(User populated_user) {
         /*By default the profile picture is a gender-neutral avatar, unless he/she has uploaded his/her
         own profile picture which must then be displayed instead of the default avatar */
-        UserManager.getProfilePicture((ImageView) findViewById(R.id.profile_picture_edit_id), this);
+        if (populated_user.getProfile_picture() != null) {
+            ImageView profile_pic_view = (ImageView) findViewById(R.id.profile_picture_edit_id);
+            profile_pic_view.setImageBitmap(populated_user.getProfile_picture());
+        }
 
         //Update navigation menu with the logged-in user's info
         //Username
@@ -234,7 +264,7 @@ public class UserProfileEditActivity extends AppCompatActivity {
         }
     }
 
-    private int getPositionFromData(String character, String[] orderedData) {
+    private int getPositionFromData(String character, List<String> orderedData) {
         int position = 0;
         for (String s : orderedData) {
             String letter = "" + s.charAt(0);
@@ -249,11 +279,11 @@ public class UserProfileEditActivity extends AppCompatActivity {
     /**
      * Creates an ordered array of  unique letters corresponding to the letters used as first characters
      * in the items name
-     * @param items Array of items name
+     * @param items List of items name
      * @return ordered array of  unique letters corresponding to the letters used as first characters
      * in the items name
      */
-    private String[] getCustomAlphabet(String[] items) {
+    private String[] getCustomAlphabet(List<String> items) {
         Set<String> first_letters = new HashSet<>();
         String[] res;
 
@@ -261,19 +291,19 @@ public class UserProfileEditActivity extends AppCompatActivity {
             first_letters.add(item.substring(0, 1).toUpperCase());
         }
 
-        res = first_letters.toArray(new String[0]);
+        res = first_letters.toArray(new String[first_letters.size()]);
         Arrays.sort(res);
 
-        return res;
+        return(res);
     }
 
     /**
      * Constructs a map (all subjects -> is(un)checked) for a user
      * @param user_subjects Array of subjects( names associated with a user
-     * @param all_subjects Array of all the subjects' names available in the app
+     * @param all_subjects List of all the subjects' names available in the app
      * @return a map (all subjects -> is(un)checked) for a user
      */
-    private Map<String, Boolean> populateMappingUserSubject(String[] user_subjects, String [] all_subjects) {
+    private Map<String, Boolean> populateMappingUserSubject(List<String> user_subjects, List<String> all_subjects) {
         Map<String, Boolean> res = new HashMap<>();
 
         //Initial population of the map res: by default all the subjects

@@ -1,18 +1,23 @@
 package com.example.toto.users;
 
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.example.toto.interfaces.Storable;
-import com.example.toto.sessions.Status;
 import com.example.toto.sessions.Status;
 import com.example.toto.subjects.Subject;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 
@@ -22,6 +27,7 @@ public class User extends Observable implements Storable, Parcelable {
     private String email;
     private Role role;
     private String id;
+    private Bitmap profile_picture;
     private Status status; // for tutors
     private Map<String,Subject> subjects = new HashMap<>();
 
@@ -103,6 +109,14 @@ public class User extends Observable implements Storable, Parcelable {
         return id;
     }
 
+    public Bitmap getProfile_picture() {
+        return profile_picture;
+    }
+
+    public void setProfile_picture(Bitmap profile_picture) {
+        this.profile_picture = profile_picture;
+    }
+
     public String getUsername() {
         return username;
     }
@@ -119,9 +133,21 @@ public class User extends Observable implements Storable, Parcelable {
      * Return the alphabetically ordered list of the subjects a student (tutor) wishes to learn (teach)
      * @return alphabetically ordered list of the subjects a student (tutor) wishes to learn (teach)
      */
-    public String[] getOrderedSubjects() {
-        String[] res = subjects.keySet().toArray(new String[0]);
-        Arrays.sort(res);
+    public List<String> getOrderedSubjects() {
+        List<String> res = new ArrayList<>();
+
+        //Iterate over map values only (no need of the associated keys here)
+        for (Subject subject_item: subjects.values()) {
+            res.add(subject_item.getName());
+        }
+
+        //Sorting the list of subjects' name by alphabetical order (case sensitive)
+        Collections.sort(res, new Comparator<String>() {
+            @Override
+            public int compare(String s1, String s2) {
+                return s1.compareTo(s2);
+            }
+        });
 
         return res;
     }
