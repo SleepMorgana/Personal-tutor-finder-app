@@ -33,4 +33,6 @@
     <string name="tutor_admin_page">Tutors</string>
     <string name="subject_admin_page">Subjects</string>
     <string name="edit_pen_button_description">Edit profile picture button</string>
+    <string name="log_out_text">Sign out</string>
+    <string name="search_tutors_text">Search Tutors</string>
 </resources>
