@@ -33,7 +33,7 @@ public class User extends Observable implements Storable, Parcelable {
         role = Role.valueOf((String)user.getData().get("Role"));
         if (role.equals(Role.TUTOR))
             status = Status.valueOf((String)user.getData().get("Status"));
-        subjects = (Map<String, Subject>) user.getData().get("Subjects");
+        subjects = flatten2((Map<String, Map<String, Object>>) user.getData().get("Subjects"));
         if (subjects == null)
             subjects = new HashMap<>();
     }
@@ -143,6 +143,14 @@ public class User extends Observable implements Storable, Parcelable {
         Map<String,Object> newMap = new HashMap<>();
         for(Map.Entry<String, Subject> entry : map.entrySet()) {
             newMap.put(entry.getKey(), ((Subject)entry.getValue()).marshal());
+        }
+        return newMap;
+    }
+
+    public Map<String,Subject> flatten2(Map<String,Map<String,Object>> map){
+        Map<String,Subject> newMap = new HashMap<>();
+        for(Map.Entry<String, Map<String,Object>> entry : map.entrySet()) {
+            newMap.put(entry.getKey(), new Subject(entry.getKey(),(String) entry.getValue().get("Name")));
         }
         return newMap;
     }
