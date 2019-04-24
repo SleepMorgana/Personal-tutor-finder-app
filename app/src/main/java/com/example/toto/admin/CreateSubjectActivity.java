@@ -1,10 +1,12 @@
 package com.example.toto.admin;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -35,8 +37,8 @@ public class CreateSubjectActivity extends AppCompatActivity {
             //edit
             initEdit();
             final EditText ed1 = (EditText) findViewById(R.id.admin_edit_subject_edit);
-            Button save = (Button) findViewById(R.id.admin_edit_subject_button);
-            Button delete = (Button) findViewById(R.id.admin_delete_subject_button);
+            FloatingActionButton save = (FloatingActionButton) findViewById(R.id.admin_edit_subject_button);
+            FloatingActionButton delete = (FloatingActionButton) findViewById(R.id.admin_delete_subject_button);
             ed1.setText(subject.getName());
 
             save.setOnClickListener(new View.OnClickListener() {
@@ -74,21 +76,36 @@ public class CreateSubjectActivity extends AppCompatActivity {
                         Util.printToast(mContext, "Missing subject name", Toast.LENGTH_LONG);
                         return;
                     }
-                    //delete subject
-                    UserManager.deleteSubject(subject, new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            //OK
-                            Util.printToast(mContext, "Deletion was successful!", Toast.LENGTH_SHORT);
-                            finish();
-                        }
-                    }, new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            //error
-                            Util.printToast(mContext, "There were issues with deleting the subject", Toast.LENGTH_SHORT);
-                        }
-                    });
+                    Util.makeDialog("Delete item", "You are about to delete the selected item.",
+                            "Delete", "Cancel", mContext, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    //delete subject
+                                    UserManager.deleteSubject(subject, new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                            //OK
+                                            Util.printToast(mContext, "Deletion was successful!", Toast.LENGTH_SHORT);
+                                            finish();
+                                        }
+                                    }, new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            //error
+                                            Util.printToast(mContext, "There were issues with deleting the subject", Toast.LENGTH_SHORT);
+                                        }
+                                    });
+                                    dialog.dismiss();
+                                }
+                            }, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    //cancel deletion
+                                    dialog.dismiss();
+                                    return;
+                                }
+                            }).show();
+
                 }
             });
 
@@ -96,7 +113,7 @@ public class CreateSubjectActivity extends AppCompatActivity {
             //create
             initCreate();
             final EditText ed1 = (EditText) findViewById(R.id.admin_create_subject_edit);
-            Button save = (Button) findViewById(R.id.admin_create_subject_button);
+            FloatingActionButton save = (FloatingActionButton) findViewById(R.id.admin_create_subject_button);
 
             save.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -129,7 +146,6 @@ public class CreateSubjectActivity extends AppCompatActivity {
 
     private void initCreate(){
         setContentView(R.layout.activity_admin_add_subject);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setToolbar();
     }
 
@@ -139,7 +155,7 @@ public class CreateSubjectActivity extends AppCompatActivity {
     }
 
     private void setToolbar(){
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.admin_toolbar);
         setSupportActionBar(toolbar);
         // add back arrow to toolbar
         if (getSupportActionBar() != null){

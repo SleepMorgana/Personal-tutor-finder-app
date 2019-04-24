@@ -1,6 +1,7 @@
 package com.example.toto.admin;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -11,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -23,6 +25,7 @@ import android.widget.Toast;
 
 import com.alphabetik.Alphabetik;
 import com.example.toto.R;
+import com.example.toto.SignInSignUp;
 import com.example.toto.subjects.Subject;
 import com.example.toto.subjects.SubjectManager;
 import com.example.toto.users.User;
@@ -42,6 +45,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
@@ -57,7 +61,7 @@ public class AdminMainActivity extends AppCompatActivity implements Observer {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.admin_toolbar);
         setSupportActionBar(toolbar);
 
         mContent = (FrameLayout) findViewById(R.id.content);
@@ -82,7 +86,6 @@ public class AdminMainActivity extends AppCompatActivity implements Observer {
         mContent.addView(mInflater.inflate(R.layout.activity_admin_user_list,null));
         final ListView listView  = (ListView) mContent.findViewById(R.id.admin_tutor_listview);
 
-
         fetchTutorData(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
@@ -103,37 +106,66 @@ public class AdminMainActivity extends AppCompatActivity implements Observer {
                                 @Override
                                 public void onSuccess(Object o) {
                                     //o = element selected
-                                    User user = (User) o;
-                                    UserManager.acceptTutorRequest(user, new OnSuccessListener<Void>() {
-                                        @Override
-                                        public void onSuccess(Void aVoid) {
-                                            //OK
-                                            Util.printToast(mActivity,"Tutor request was accepted",Toast.LENGTH_SHORT);
-                                        }
-                                    }, new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
-                                            //error
-                                            Util.printToast(mActivity,"There was an error accepting tutor request",Toast.LENGTH_SHORT);
-                                        }
-                                    });
+                                    final User user = (User) o;
+                                    Util.makeDialog("Accept Tutor", "You are about to accept the selected tutor request.",
+                                            "Accept", "Cancel", mActivity, new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    UserManager.acceptTutorRequest(user, new OnSuccessListener<Void>() {
+                                                        @Override
+                                                        public void onSuccess(Void aVoid) {
+                                                            //OK
+                                                            Util.printToast(mActivity,"Tutor request was accepted",Toast.LENGTH_SHORT);
+                                                        }
+                                                    }, new OnFailureListener() {
+                                                        @Override
+                                                        public void onFailure(@NonNull Exception e) {
+                                                            //error
+                                                            Util.printToast(mActivity,"There was an error accepting tutor request",Toast.LENGTH_SHORT);
+                                                        }
+                                                    });
+                                                    dialog.dismiss();
+                                                }
+                                            }, new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    dialog.dismiss();
+                                                    return;
+                                                }
+                                            }).show();
+
                                 }
                             }, new OnSuccessListener() {
                         @Override
                         public void onSuccess(Object o) {
-                            User user = (User) o;
-                            UserManager.declineTutorRequest(user, new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void aVoid) {
-                                    //OK
-                                    Util.printToast(mActivity,"Tutor request was declined",Toast.LENGTH_SHORT);
-                                }
-                            }, new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    Util.printToast(mActivity,"There was an error declining tutor request",Toast.LENGTH_SHORT);
-                                }
-                            });
+                            final User user = (User) o;
+                            Util.makeDialog("Decline Tutor", "You are about to decline the selected tutor request.",
+                                    "Decline", "Cancel", mActivity, new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            //decline
+                                            UserManager.declineTutorRequest(user, new OnSuccessListener<Void>() {
+                                                @Override
+                                                public void onSuccess(Void aVoid) {
+                                                    //OK
+                                                    Util.printToast(mActivity, "Tutor request was declined", Toast.LENGTH_SHORT);
+                                                }
+                                            }, new OnFailureListener() {
+                                                @Override
+                                                public void onFailure(@NonNull Exception e) {
+                                                    Util.printToast(mActivity, "There was an error declining tutor request", Toast.LENGTH_SHORT);
+                                                }
+                                            });
+                                            dialog.dismiss();
+                                        }
+                                    }, new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            dialog.dismiss();
+                                            return;
+                                        }
+                                    }).show();
+
                         }
                     }));
                 }
@@ -237,6 +269,33 @@ public class AdminMainActivity extends AppCompatActivity implements Observer {
         mContent.removeAllViews();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.admin_options, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.admin_action_signout) {
+            //signout
+            UserManager.signOut();
+            Intent intent = new Intent(this, SignInSignUp.class);
+            startActivity(intent);
+            Objects.requireNonNull(this).finish();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
     private String[] getCustomAlphabet(List<String> items) {
         Set<String> first_letters = new HashSet<>();
         String[] res;
@@ -286,12 +345,12 @@ public class AdminMainActivity extends AppCompatActivity implements Observer {
         //Update UI
 
         //Update tutor page, TODO: still doesn't refreshes
-        if (o instanceof User){
-            mPageFlag = true;
-            setTutorPage();
-            //instead of fetching online maybe just update the local list
-            return;
-        }
+//        if (o instanceof User){
+//            mPageFlag = true;
+//            setTutorPage();
+//            //instead of fetching online maybe just update the local list
+//            return;
+//        }
 
     }
 }

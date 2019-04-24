@@ -1,7 +1,10 @@
 package com.example.toto.utils;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.widget.Toast;
 
 public class Util {
@@ -19,6 +22,18 @@ public class Util {
         mDialog.setMessage(msg);
         mDialog.setIndeterminate(false);
         mDialog.setCancelable(true);
+
+        return mDialog;
+    }
+
+    public static Dialog makeDialog(String title, String msg, String positiveLabal, String negativeLabel, Context ctx,
+                                    DialogInterface.OnClickListener positive, DialogInterface.OnClickListener negative){
+        AlertDialog mDialog = new AlertDialog.Builder(ctx)
+                .setTitle(title)
+                .setMessage(msg)
+                .setPositiveButton(positiveLabal, positive)
+                .setNegativeButton(negativeLabel, negative)
+                .create();
 
         return mDialog;
     }
