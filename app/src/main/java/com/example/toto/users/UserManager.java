@@ -15,6 +15,7 @@ import com.bumptech.glide.Glide;
 import com.example.toto.sessions.Session;
 import com.example.toto.sessions.Status;
 import com.example.toto.subjects.Subject;
+import com.example.toto.subjects.SubjectManager;
 import com.example.toto.utils.Util;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -322,30 +323,30 @@ public class UserManager {
     }
 
     //Add new subject to the subject collection
-    public static void createSubject(Subject subject){
+    public static void createSubject(Subject subject, OnSuccessListener<Void> success, OnFailureListener error){
         if (!currentUser.getUser().getRole().equals(Role.ADMIN)){
             //not admin, could throw an exception
             return;
         }
-        //SubjectManager.addNewSubject();
+        SubjectManager.addNewSubject(subject, success, error);
     }
 
     //Remove subject from the database
-    public static void deleteSubject(Subject subject){
+    public static void deleteSubject(Subject subject, OnSuccessListener<Void> success, OnFailureListener error){
         if (!currentUser.getUser().getRole().equals(Role.ADMIN)){
             //not admin, could throw an exception
             return;
         }
-
+        SubjectManager.removeSubject(subject, success, error);
     }
 
     //Update subject to the subject collection
-    public static void updateSubject(Subject subject){
+    public static void updateSubject(Subject subject, OnSuccessListener<Void> success, OnFailureListener error){
         if (!currentUser.getUser().getRole().equals(Role.ADMIN)){
             //not admin, could throw an exception
             return;
         }
-        //SubjectManager.addNewSubject();
+        SubjectManager.addNewSubject(subject, success, error);
     }
 
     //Just for testing, callback methods are difficult to unit test

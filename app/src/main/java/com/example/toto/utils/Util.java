@@ -5,6 +5,8 @@ import android.content.Context;
 import android.widget.Toast;
 
 public class Util {
+    public static final String TAG = "TUTOR-FINDER";
+
     public static void printToast(Context context, String msg, int duration){
         Toast.makeText(context, msg,
                 duration).show();
