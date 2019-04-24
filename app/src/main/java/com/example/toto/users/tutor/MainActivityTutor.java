@@ -1,5 +1,6 @@
 package com.example.toto.users.tutor;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import android.support.design.widget.NavigationView;
@@ -11,10 +12,16 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.example.toto.R;
+import com.example.toto.SignInSignUp;
 import com.example.toto.users.User;
 import com.example.toto.users.UserManager;
+import com.example.toto.users.UserProfileActivity;
 
 //This is going to be used as the home activity of the application for tutors
 public class MainActivityTutor extends AppCompatActivity
@@ -25,22 +32,57 @@ public class MainActivityTutor extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_tutor);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        //setSupportActionBar(toolbar);
-        Log.d("CECILE","Tutor");
-        User user = UserManager.getUserInstance().getUser();
-        /*Log.d("CECILE", user.getUsername());
-        Log.d("CECILE", user.getEmail());
-        Log.d("CECILE", user.getId());
-        Log.d("CECILE", user.getRole().toString());*/
+//        setSupportActionBar(toolbar);
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+        final View headerView = navigationView.getHeaderView(0);
+        Button sign_out_button = findViewById(R.id.log_out_button_id); //Sign out button
+
+        //Data sent from previous activity (i.e. currently logged-in user) //TODO Remove this when merging with not_properly_working version
+        Intent intent = getIntent();
+        final User user = intent.getParcelableExtra("myCurrentUser");
+
+        /*By default the profile picture is a gender-neutral avatar. If the logged-in user doesn't have
+        a profile picture associated to his/her profile, this must be displayed instead of the default avatar*/
+        UserManager.getProfilePicture((ImageView) headerView.findViewById(R.id.profile_pic_id), this);
+
+        //Update navigation menu with the logged-in user's info
+        //Username
+        TextView text_view = headerView.findViewById(R.id.username_nav_id);
+        text_view.setText(user.getUsername());
+        //Email
+        text_view = headerView.findViewById(R.id.email_navigation_id);
+        text_view.setText(user.getEmail());
+
+        //Everytime the user clicks on the header of the navbar, he/she is redirected to its profile page
+        headerView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivityTutor.this, UserProfileActivity.class);
+                //Data sent: currently logged-in user
+                intent.putExtra("myCurrentUser", user);
+                startActivity(intent);
+            }
+        });
+
+        //Sign out action
+        sign_out_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                UserManager.signOut();
+
+                //Go back to sign in / sign out activity
+                Intent intent = new Intent(MainActivityTutor.this, SignInSignUp.class);
+                startActivity(intent);
+                finish();
+            }
+        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
     }
 
     @Override

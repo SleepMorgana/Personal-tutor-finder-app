@@ -18,6 +18,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -26,6 +27,7 @@ import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.example.toto.R;
+import com.example.toto.SignInSignUp;
 import com.example.toto.users.User;
 import com.example.toto.users.UserManager;
 import com.example.toto.users.UserProfileActivity;
@@ -50,6 +52,7 @@ public class MainActivityStudent extends AppCompatActivity
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         final View headerView = navigationView.getHeaderView(0);
+        Button sign_out_button = findViewById(R.id.log_out_button_id); //Sign out button
 
         final  User user = UserManager.getUserInstance().getUser();
 
@@ -77,8 +80,18 @@ public class MainActivityStudent extends AppCompatActivity
             }
         });
 
+        //Sign out action
+        sign_out_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                UserManager.signOut();
 
-
+                //Go back to sign in / sign out activity
+                Intent intent = new Intent(MainActivityStudent.this, SignInSignUp.class);
+                startActivity(intent);
+                finish();
+            }
+        });
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -125,7 +138,7 @@ public class MainActivityStudent extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
+        if (id == R.id.nav_search_tutors) {
             // Handle the camera action
         } else if (id == R.id.nav_gallery) {
 
@@ -134,8 +147,6 @@ public class MainActivityStudent extends AppCompatActivity
         } else if (id == R.id.nav_manage) {
 
         } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
 
         }
 
