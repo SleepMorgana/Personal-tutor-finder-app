@@ -9,7 +9,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -38,13 +37,14 @@ public class MainActivityTutor extends AppCompatActivity
         final View headerView = navigationView.getHeaderView(0);
         Button sign_out_button = findViewById(R.id.log_out_button_id); //Sign out button
 
-        //Data sent from previous activity (i.e. currently logged-in user) //TODO Remove this when merging with not_properly_working version
-        Intent intent = getIntent();
-        final User user = intent.getParcelableExtra("myCurrentUser");
+        final  User user = UserManager.getUserInstance().getUser();
 
         /*By default the profile picture is a gender-neutral avatar. If the logged-in user doesn't have
         a profile picture associated to his/her profile, this must be displayed instead of the default avatar*/
-        UserManager.getProfilePicture((ImageView) headerView.findViewById(R.id.profile_pic_id), this);
+        if (user.getProfile_picture() != null) {
+            ImageView profile_pic_view = (ImageView) headerView.findViewById(R.id.profile_pic_id);
+            profile_pic_view.setImageBitmap(user.getProfile_picture());
+        }
 
         //Update navigation menu with the logged-in user's info
         //Username
