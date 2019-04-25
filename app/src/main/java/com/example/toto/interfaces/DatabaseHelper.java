@@ -21,11 +21,10 @@ public abstract class DatabaseHelper<T extends Storable> {
         COLLECTION_NAME = collectionName;
         db = FirebaseFirestore.getInstance();
         TAG = tag;
-        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
         FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
                 .setTimestampsInSnapshotsEnabled(true)
                 .build();
-        firestore.setFirestoreSettings(settings);
+        db.setFirestoreSettings(settings);
     }
 
     //if the entity is present in the database update the record, else create new record

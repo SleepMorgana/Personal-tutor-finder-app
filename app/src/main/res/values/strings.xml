@@ -44,4 +44,9 @@
     <string name="subjects_taught_txt">The subjects I can teach:</string>
     <string name="no_subjects_specified">You do not have specified any subjects yet. Please edit your profile to add subjects</string>
     <string name="search_txt">Search</string>
+    <string name="subject_panel">Subject panel</string>
+    <string name="subject_name">Subject\'s name</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
+    <string name="sign_out_txt">Sign Out</string>
 </resources>

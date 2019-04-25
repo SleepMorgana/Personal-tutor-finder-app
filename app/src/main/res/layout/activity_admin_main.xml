@@ -7,8 +7,8 @@
     android:layout_height="match_parent">
 
     <include
-        android:id="@+id/include"
-        layout="@layout/app_bar_main"
+        android:id="@+id/admin_include"
+        layout="@layout/app_bar_admin_main"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
@@ -48,7 +48,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:background="?android:attr/windowBackground"
-        app:layout_constraintBottom_toBottomOf="@+id/include"
+        app:layout_constraintBottom_toBottomOf="@+id/admin_include"
         app:menu="@menu/admin_navigation"
         tools:layout_editor_absoluteX="8dp" />
 </android.support.constraint.ConstraintLayout>

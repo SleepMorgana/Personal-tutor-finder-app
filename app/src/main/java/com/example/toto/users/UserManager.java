@@ -15,6 +15,7 @@ import com.bumptech.glide.Glide;
 import com.example.toto.sessions.Session;
 import com.example.toto.sessions.Status;
 import com.example.toto.subjects.Subject;
+import com.example.toto.subjects.SubjectManager;
 import com.example.toto.utils.Util;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -36,14 +37,14 @@ import java.util.concurrent.Future;
 //Use the UserManager to manage the state of the logged-in user
 public class UserManager {
     private static UserController currentUser;
-    private static final UserDatabaseHelper userDb = new UserDatabaseHelper();
+    private static UserDatabaseHelper userDb = null;
 
     //acts as an initializer
     private static void initCurrentUser(final User user,@NonNull final OnSuccessListener listener,@NonNull final OnFailureListener failureListener) throws RuntimeException {
         if (user == null)
             throw new RuntimeException("initialization user is null");
         //retrieve info from users collection
-        userDb.getById(user.getId(), new OnCompleteListener<DocumentSnapshot>() {
+        getDbInstance().getById(user.getId(), new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
@@ -55,7 +56,7 @@ public class UserManager {
                     } else {
                         currentUser = new UserController(user);
                         //save the current user in the db, since it wasn't recorded yet
-                        userDb.upsert(user, new OnSuccessListener<Void>() {
+                        getDbInstance().upsert(user, new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
                                 listener.onSuccess(currentUser);
@@ -246,7 +247,7 @@ public class UserManager {
         if (session == null || userId.equals(""))
             return;
 
-        userDb.getById(userId, new OnCompleteListener<DocumentSnapshot>() {
+        getDbInstance().getById(userId, new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful() && task.getResult()!=null){
@@ -268,10 +269,10 @@ public class UserManager {
         addSession(currentUser.getUser(), session);
     }
 
-    //Add subject to current user
+    //Add already existing subject to current user
     public static void addSubject(Subject subject, OnSuccessListener success, OnFailureListener error){
         currentUser.getUser().addSubject(subject);
-        userDb.upsert(currentUser.getUser(),success,error);
+        new UserDatabaseHelper().upsert(currentUser.getUser(),success,error);
     }
 
     /**
@@ -280,15 +281,15 @@ public class UserManager {
      * @param success Listener called when upsert task completed successfully
      * @param error Listener called when upsert task was not successfully completed
      */
-    public static void addSubjects(Map<String,Subject> subjects, OnSuccessListener success, OnFailureListener error){
+    public static void addSubjects(Map<String,Subject> subjects, final OnSuccessListener success, final OnFailureListener error){
         currentUser.getUser().setSubjects(subjects);
-        userDb.upsert(currentUser.getUser(),success,error);
+        new UserDatabaseHelper().upsert(currentUser.getUser(),success,error);
     }
 
     //Remove subject from current user
     public static void removeSubject(Subject subject, OnSuccessListener success, OnFailureListener error){
         currentUser.getUser().removeSubject(subject);
-        userDb.upsert(currentUser.getUser(),success,error);
+        new UserDatabaseHelper().upsert(currentUser.getUser(),success,error);
     }
 
     //
@@ -301,7 +302,7 @@ public class UserManager {
             return;
         }
         user.setStatus(Status.ACCEPTED);
-        userDb.upsert(user, success, error);
+        new UserDatabaseHelper().upsert(user, success, error);
     }
 
     public static void declineTutorRequest(User user, OnSuccessListener<Void> success, OnFailureListener error){
@@ -310,7 +311,7 @@ public class UserManager {
             return;
         }
         user.setStatus(Status.DECLINED);
-        userDb.upsert(user, success, error);
+        new UserDatabaseHelper().upsert(user, success, error);
     }
 
     public static void retrievePendingTutors(OnSuccessListener<QuerySnapshot> success, OnFailureListener error){
@@ -318,34 +319,41 @@ public class UserManager {
             //not admin, could throw an exception
             return;
         }
-        userDb.getPendingTutors(success,error);
+        getDbInstance().getPendingTutors(success,error);
     }
 
     //Add new subject to the subject collection
-    public static void createSubject(Subject subject){
+    public static void createSubject(Subject subject, OnSuccessListener<Void> success, OnFailureListener error){
         if (!currentUser.getUser().getRole().equals(Role.ADMIN)){
             //not admin, could throw an exception
             return;
         }
-        //SubjectManager.addNewSubject();
+        SubjectManager.addNewSubject(subject, success, error);
     }
 
     //Remove subject from the database
-    public static void deleteSubject(Subject subject){
+    public static void deleteSubject(Subject subject, OnSuccessListener<Void> success, OnFailureListener error){
         if (!currentUser.getUser().getRole().equals(Role.ADMIN)){
             //not admin, could throw an exception
             return;
         }
-
+        SubjectManager.removeSubject(subject, success, error);
     }
 
     //Update subject to the subject collection
-    public static void updateSubject(Subject subject){
+    public static void updateSubject(Subject subject, OnSuccessListener<Void> success, OnFailureListener error){
         if (!currentUser.getUser().getRole().equals(Role.ADMIN)){
             //not admin, could throw an exception
             return;
         }
-        //SubjectManager.addNewSubject();
+        SubjectManager.addNewSubject(subject, success, error);
+    }
+
+    private static UserDatabaseHelper getDbInstance(){
+        if (userDb!=null)
+            return userDb;
+        userDb = new UserDatabaseHelper();
+        return userDb;
     }
 
     //Just for testing, callback methods are difficult to unit test

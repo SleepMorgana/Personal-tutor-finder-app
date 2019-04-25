@@ -59,6 +59,17 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".admin.CreateSubjectActivity"
+            android:label="@string/subject_panel"
+            android:parentActivityName=".admin.AdminMainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".admin.AdminMainActivity"
             android:label="@string/title_admin_activity_main"
             android:theme="@style/AppTheme.NoActionBar">

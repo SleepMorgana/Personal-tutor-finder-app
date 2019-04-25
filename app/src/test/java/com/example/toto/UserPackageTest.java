@@ -74,6 +74,12 @@ public class UserPackageTest {
         for(Map.Entry<String,Subject> entry : actual.entrySet()) {
             assertTrue(expected.containsKey(entry.getKey()));
         }
+
+        //null arg
+        mock = null;
+        expected = new HashMap<>();
+        actual = user.flatten2(mock);
+        assertEquals(String.valueOf(expected),String.valueOf(actual));
     }
 
 }

@@ -1,5 +1,8 @@
 package com.example.toto.subjects;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.example.toto.interfaces.Storable;
 import com.google.firebase.firestore.DocumentSnapshot;
 
@@ -7,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 //In the case of subject the name
-public class Subject implements Storable {
+public class Subject implements Storable, Parcelable {
     private String id;
     private String name;
 
@@ -47,17 +50,33 @@ public class Subject implements Storable {
         return subject;
     }
 
-    //This just asmaller representation of the subject class, {id:"",name:""}
-    public class SubjectTuple extends Subject{
-        public SubjectTuple(String id, String name){
-            super(id,name);
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.name);
+        dest.writeString(this.id);
+    }
+
+    public static final Creator<Subject> CREATOR = new Creator<Subject>() {
+        public Subject createFromParcel(Parcel in) {
+            return new Subject(in);
         }
 
-        @Override
-        public Map<String, Object> marshal() {
-            Map<String, Object> subject = new HashMap<>();
-            subject.put("Name",name);
-            return subject;
+        public Subject[] newArray(int size) {
+            return new Subject[size];
         }
+    };
+
+    /**
+     * Constructor that takes a parcel and construct a populated user object
+     * @param in parcel
+     */
+    private Subject(Parcel in) {
+       name = in.readString();
+       this.id = in.readString();
     }
 }
