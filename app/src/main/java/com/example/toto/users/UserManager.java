@@ -269,7 +269,7 @@ public class UserManager {
         addSession(currentUser.getUser(), session);
     }
 
-    //Add subject to current user
+    //Add already existing subject to current user
     public static void addSubject(Subject subject, OnSuccessListener success, OnFailureListener error){
         currentUser.getUser().addSubject(subject);
         userDb.upsert(currentUser.getUser(),success,error);

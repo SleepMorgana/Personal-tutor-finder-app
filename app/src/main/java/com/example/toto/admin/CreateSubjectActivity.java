@@ -62,7 +62,7 @@ public class CreateSubjectActivity extends AppCompatActivity {
                         @Override
                         public void onFailure(@NonNull Exception e) {
                             //error
-                            Util.printToast(mContext, "There were issues with the editing", Toast.LENGTH_SHORT);
+                            Util.printToast(mContext, String.format("There were issues with the editing: %s",e.getMessage()), Toast.LENGTH_SHORT);
                         }
                     });
                 }
@@ -136,7 +136,7 @@ public class CreateSubjectActivity extends AppCompatActivity {
                         @Override
                         public void onFailure(@NonNull Exception e) {
                             //error
-                            Util.printToast(mContext, "There were issues with the subject creation", Toast.LENGTH_SHORT);
+                            Util.printToast(mContext, String.format("There were issues with the subject creation: %s", e.getMessage()), Toast.LENGTH_SHORT);
                         }
                     });
                 }

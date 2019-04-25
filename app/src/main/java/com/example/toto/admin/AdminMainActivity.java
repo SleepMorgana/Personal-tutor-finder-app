@@ -17,7 +17,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -30,7 +29,6 @@ import com.example.toto.subjects.Subject;
 import com.example.toto.subjects.SubjectManager;
 import com.example.toto.users.User;
 import com.example.toto.users.UserManager;
-import com.example.toto.utils.CheckboxArrayAdapter;
 import com.example.toto.utils.DoubleActionListViewAdapter;
 import com.example.toto.utils.Util;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -70,7 +68,7 @@ public class AdminMainActivity extends AppCompatActivity implements Observer {
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-        //navigation.setSelectedItemId();
+        navigation.setSelectedItemId(R.id.navigation_tutor_page);
         setTutorPage();
     }
 
@@ -79,9 +77,7 @@ public class AdminMainActivity extends AppCompatActivity implements Observer {
             return;
         }
         // clean previous subject views
-        if (mContent.findViewById(R.id.admin_subject_listview)!=null){
-            clearContent();
-        }
+        clearContent();
 
         mContent.addView(mInflater.inflate(R.layout.activity_admin_user_list,null));
         final ListView listView  = (ListView) mContent.findViewById(R.id.admin_tutor_listview);
@@ -190,9 +186,7 @@ public class AdminMainActivity extends AppCompatActivity implements Observer {
         if (mPageFlag)
             return;
         //clean previous user views
-        if (mContent.findViewById(R.id.admin_tutor_listview)!=null){
-            clearContent();
-        }
+        clearContent();
 
         mContent.addView(mInflater.inflate(R.layout.activity_admin_subject_list,null));
 
@@ -344,7 +338,7 @@ public class AdminMainActivity extends AppCompatActivity implements Observer {
     public void update(Observable o, Object arg) {
         //Update UI
 
-        //Update tutor page, TODO: still doesn't refreshes
+        //Update tutor page
 //        if (o instanceof User){
 //            mPageFlag = true;
 //            setTutorPage();
