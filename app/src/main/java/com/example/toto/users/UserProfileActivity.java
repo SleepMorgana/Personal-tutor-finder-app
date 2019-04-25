@@ -26,6 +26,7 @@ public class UserProfileActivity extends AppCompatActivity{
 
     private ListView listView;
     private Pair<List<String>, String[]> orderedSubjects;
+    private User user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,10 +43,26 @@ public class UserProfileActivity extends AppCompatActivity{
         }
 
         //Current user
-        User user = UserManager.getUserInstance().getUser();
+        user = UserManager.getUserInstance().getUser();
 
         //Render the user's identity
         updateUserIdentity(user);
+
+        //Render the user's subjects (learning needs for subjects vs tutoring subjects for tutors)
+        renderSubjects(user);
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+
+        //When BACK BUTTON is pressed, the activity on the stack is restarted
+        /*By default the profile picture is a gender-neutral avatar, unless he/she has uploaded his/her
+        own profile picture which must then be displayed instead of the default avatar */
+        if (user.getProfile_picture() != null) {
+            ImageView profile_pic_view = (ImageView) findViewById(R.id.profile_picture_view_id);
+            profile_pic_view.setImageBitmap(user.getProfile_picture());
+        }
 
         //Render the user's subjects (learning needs for subjects vs tutoring subjects for tutors)
         renderSubjects(user);

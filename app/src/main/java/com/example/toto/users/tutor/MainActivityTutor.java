@@ -26,20 +26,23 @@ import com.example.toto.users.UserProfileActivity;
 public class MainActivityTutor extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    private User user;
+    private View headerView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_tutor);
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        final View headerView = navigationView.getHeaderView(0);
+        headerView = navigationView.getHeaderView(0);
         Button sign_out_button = findViewById(R.id.log_out_button_id); //Sign out button
 
         //Enable the Up button
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         //setSupportActionBar(toolbar);
 
-        final  User user = UserManager.getUserInstance().getUser();
+        user = UserManager.getUserInstance().getUser();
 
         /*By default the profile picture is a gender-neutral avatar. If the logged-in user doesn't have
         a profile picture associated to his/her profile, this must be displayed instead of the default avatar*/
@@ -88,12 +91,15 @@ public class MainActivityTutor extends AppCompatActivity
     }
 
     @Override
-    public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
+    protected void onRestart() {
+        super.onRestart();
+
+        //When BACK BUTTON is pressed, the activity on the stack is restarted
+        /*By default the profile picture is a gender-neutral avatar. If the logged-in user doesn't have
+        a profile picture associated to his/her profile, this must be displayed instead of the default avatar*/
+        if (user.getProfile_picture() != null) {
+            ImageView profile_pic_view = (ImageView) headerView.findViewById(R.id.profile_pic_id);
+            profile_pic_view.setImageBitmap(user.getProfile_picture());
         }
     }
 
