@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -45,6 +46,7 @@ public class CreateSubjectActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     final String name = (ed1.getText()!=null)? ed1.getText().toString().trim() : "";
+                    Log.d(Util.TAG,"Edit button");
                     if (name.equals("")) {
                         Util.printToast(mContext, "Missing subject name", Toast.LENGTH_LONG);
                         return;
@@ -125,6 +127,7 @@ public class CreateSubjectActivity extends AppCompatActivity {
                     }
                     //save the new subject
                     Subject subject1 = new Subject(name);
+                    Log.d(Util.TAG,"Save button");
                     UserManager.createSubject(subject1, new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {

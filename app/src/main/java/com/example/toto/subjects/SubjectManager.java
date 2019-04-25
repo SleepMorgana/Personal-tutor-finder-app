@@ -1,7 +1,9 @@
 package com.example.toto.subjects;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 
+import com.example.toto.utils.Util;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -17,15 +19,17 @@ public class SubjectManager {
             failureListener.onFailure(new NullPointerException("subject instance is null"));
             return;
         }
-        retrieveSubjectsByName(subject.getName(), new OnSuccessListener<QuerySnapshot>() {
+
+        retrieveSubjectsByName(subject.getName().trim(), new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                 //check if doc exists
-                if (queryDocumentSnapshots.size()>0){
+
+                if (queryDocumentSnapshots.size() > 0) {
                     //exists
                     failureListener.onFailure(new UnsupportedOperationException("subject with the same name already exists"));
-                }else{
-                    db.upsert(subject, new OnSuccessListener<Void>() {
+                } else {
+                    getDbInstance().upsert(subject, new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
                             //add code here if the method needs expanding
@@ -40,7 +44,12 @@ public class SubjectManager {
                     });
                 }
             }
-        }, failureListener);
+        }, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+
+            }
+        });
 
     }
 
@@ -50,7 +59,7 @@ public class SubjectManager {
             return;
         }
         //TODO A subject must also be deleted from user records
-        db.deleteById(subject.getId(), new OnSuccessListener<Void>() {
+        getDbInstance().deleteById(subject.getId(), new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 //add user batch operations
@@ -65,13 +74,13 @@ public class SubjectManager {
     }
 
     public static void listSubjects(@NonNull final OnSuccessListener<QuerySnapshot> successListener,@NonNull final OnFailureListener failureListener){
-        db.getAll(successListener,failureListener);
+        getDbInstance().getAll(successListener,failureListener);
     }
 
     public static void retrieveSubjectById(String id,@NonNull OnCompleteListener listener){
         if (id==null || id =="")
             return;
-        db.getById(id,listener);
+        getDbInstance().getById(id,listener);
     }
 
     public static void retrieveSubjectsByName(String name, @NonNull final OnSuccessListener<QuerySnapshot> successListener,@NonNull final OnFailureListener failureListener){
@@ -79,6 +88,10 @@ public class SubjectManager {
             failureListener.onFailure(new UnsupportedOperationException("no name input was passed to the query"));
             return;
         }
-        db.getByName(name,successListener,failureListener);
+        getDbInstance().getByName(name,successListener,failureListener);
+    }
+
+    private static SubjectDatabaseHelper getDbInstance(){
+        return db;
     }
 }

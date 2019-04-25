@@ -281,9 +281,24 @@ public class AdminMainActivity extends AppCompatActivity implements Observer {
         if (id == R.id.admin_action_signout) {
             //signout
             UserManager.signOut();
-            Intent intent = new Intent(this, SignInSignUp.class);
-            startActivity(intent);
-            Objects.requireNonNull(this).finish();
+            //give time for signout to be done
+            Util.printToast(this,"Signin out...",Toast.LENGTH_LONG);
+            new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        super.run();
+                        sleep(2000);  //Delay of 2 seconds
+                    } catch (Exception e) {
+
+                    } finally {
+                        final Intent intent = new Intent(mActivity, SignInSignUp.class);
+                        startActivity(intent);
+                        Objects.requireNonNull(mActivity).finish();
+                    }
+                }
+            }.start();
+
             return true;
         }
 
