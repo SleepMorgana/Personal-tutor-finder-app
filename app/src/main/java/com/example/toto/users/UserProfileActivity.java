@@ -24,7 +24,6 @@ import java.util.List;
 
 public class UserProfileActivity extends AppCompatActivity{
 
-    private ListView listView;
     private Pair<List<String>, String[]> orderedSubjects;
     private User user;
 
@@ -132,6 +131,9 @@ public class UserProfileActivity extends AppCompatActivity{
      * @param populated_user current logged-in user
      */
     private void renderSubjects(User populated_user) {
+        final ListView listView = findViewById(R.id.listView); //Listview implementation, with SORTED list of DATA
+        TextView instructions = findViewById(R.id.subjects_instructions_id);
+        Alphabetik alphabetik = findViewById(R.id.alphSectionIndex);
         //Alphabetically ordered list of learning needs (student) or tutoring subjects (tutors)
         orderedSubjects = populated_user.getOrderedSubjects();
 
@@ -148,16 +150,21 @@ public class UserProfileActivity extends AppCompatActivity{
 
         // Display instructions on how to add subjects if the user's subject list is empty
         if (orderedSubjects.first.size() == 0) {
-            TextView instructions = findViewById(R.id.subjects_instructions_id);
             instructions.setText(R.string.no_subjects_specified);
-            //Hide alphabet scroller on the right side
-            View alphabetScroller = findViewById(R.id.alphSectionIndex);
-            alphabetScroller.setVisibility(View.INVISIBLE);
+            //Manage visibility
+            //Show instructions for adding subjects when the user has no subjects associated with his profile
+            instructions.setVisibility(View.VISIBLE);
+            //Hide alphabet scroller on the right side + List of item (indeed, a user can uncheck all his subjects and go back to view his profile)
+            alphabetik.setVisibility(View.INVISIBLE);
+            listView.setVisibility(View.INVISIBLE);
 
         // Alphabetik implementation & ListView population
         } else {
-            Alphabetik alphabetik = findViewById(R.id.alphSectionIndex);
-            listView = findViewById(R.id.listView); //Listview implementation, with SORTED list of DATA
+            //Handle visibility
+            instructions.setVisibility(View.INVISIBLE); //Hide instructions for adding subjects when the user has no subjects associated with his profile
+            alphabetik.setVisibility(View.VISIBLE); //Show alphabet scroller
+            listView.setVisibility(View.VISIBLE); //Show list of subjects
+
             ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, orderedSubjects.first);
             listView.setAdapter(adapter);
 

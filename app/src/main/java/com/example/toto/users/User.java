@@ -128,8 +128,8 @@ public class User extends Observable implements Storable, Parcelable {
     }
 
     /**
-     * Return the alphabetically ordered list of the subjects a student (tutor) wishes to learn (teach)
-     * @return alphabetically ordered list of the subjects a student (tutor) wishes to learn (teach) //TODO
+     * Generates the sorted list of subjects names associated with the user and the corresponding sorted alphabet list in a pair
+     * @return the sorted list of subjects names associated with the user and the corresponding sorted alphabet list in a pair
      */
     public Pair<List<String>, String[]> getOrderedSubjects() {
         Pair<List<String>, String[]> res;

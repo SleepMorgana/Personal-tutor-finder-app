@@ -151,13 +151,13 @@ public class UserProfileEditActivity extends AppCompatActivity {
                             @Override
                             public void onSuccess(Void aVoid) {
                                 //OK
-                                Util.printToast(UserProfileEditActivity.this,"Your selected subjects have been saved",Toast.LENGTH_SHORT);
+                                Util.printToast(UserProfileEditActivity.this,"Your selection has been saved",Toast.LENGTH_SHORT);
                             }
                         }, new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
                                 //error
-                                Util.printToast(UserProfileEditActivity.this,"Failure: you selected subjects could not be saved. Try later or contact the administrator",Toast.LENGTH_SHORT);
+                                Util.printToast(UserProfileEditActivity.this,"Failure: your selection could not be saved. Try again later or contact the administrator",Toast.LENGTH_LONG);
                             }
                         });
                     }
@@ -166,7 +166,8 @@ public class UserProfileEditActivity extends AppCompatActivity {
         }, new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                Log.d("CECILE", "FATAL");
+                Util.printToast(UserProfileEditActivity.this,"Failing to get the list subjects available within the application. Try again later or contact the administrator",Toast.LENGTH_LONG);
+                Log.i(Util.TAG, e.getMessage()); //For debugging
             }
         });
     }
