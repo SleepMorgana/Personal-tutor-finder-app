@@ -12,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.Pair;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -24,6 +25,7 @@ import com.example.toto.subjects.Subject;
 import com.example.toto.subjects.SubjectManager;
 import com.example.toto.utils.CheckboxArrayAdapter;
 import com.example.toto.R;
+import com.example.toto.utils.Util;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -37,13 +39,13 @@ import com.google.firebase.storage.UploadTask;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.TreeMap;
 
 public class UserProfileEditActivity extends AppCompatActivity {
 
@@ -57,18 +59,18 @@ public class UserProfileEditActivity extends AppCompatActivity {
         setContentView(R.layout.activity_user_profile_edit);
         ImageView upload_profile_picture = findViewById(R.id.upload_pic_button_id);
 
+        //Received data (ordered list of the user's subjects names), sent in the previous activity
+        Intent i = getIntent();
+        final ArrayList<String> checked_subjects = i.getStringArrayListExtra("user_ordered_subject_names");
 
-        // my_child_toolbar is defined in the layout file
-        Toolbar myChildToolbar =
-                (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(myChildToolbar);
-
-        // Get a support ActionBar corresponding to this toolbar
-        ActionBar ab = getSupportActionBar();
-
-        // Enable the Up button
-        ab.setDisplayHomeAsUpEnabled(true);
-
+        //Enable the Up button
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        ActionBar ab = getSupportActionBar(); // Get a support ActionBar corresponding to this toolbar
+        if (ab != null) {
+            ab.setDisplayHomeAsUpEnabled(true);
+            ab.setDisplayShowHomeEnabled(true);
+        }
 
         //Current user
         user = UserManager.getUserInstance().getUser();
@@ -87,40 +89,47 @@ public class UserProfileEditActivity extends AppCompatActivity {
         //Render the user's identity
         updateUserIdentity(user);
 
+        /* Manage the list of the subjects associated with the user (add/remove subjects from the list )
+           from the list of subjects available within the app (i.e. in the database) */
+        // Query all subjects available within the app
         SubjectManager.listSubjects(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                final ArrayList<String> all_app_subjects = new ArrayList();
+                final ArrayList<Subject> all_app_subjects = new ArrayList<>(); //List of all subjects available in the database
                 for (DocumentSnapshot snapshot : queryDocumentSnapshots){
                     Subject subject = new Subject(snapshot);
-                    all_app_subjects.add(subject.getName());
+                    all_app_subjects.add(subject);
                 }
-                //continue
-                //List<String> checked_subjects = user.getOrderedSubjects();
-                List<String> checked_subjects = new ArrayList<>();
-                checked_subjects.add("English Literature"); checked_subjects.add("Italian Language"); checked_subjects.add("C++ Programming");
 
-                //Populating a map (all subjects -> is(un)checked) for a user
-                Map<String, Boolean> mapping_user_subjects = populateMappingUserSubject(checked_subjects, all_app_subjects);
-
-                Collections.sort(all_app_subjects); //Sort the list of all subjects (necessary for the alphabet scroller to work)
+                /* Populating two maps in a pair:
+                   - First map (first elt in pair): Mapping subject names with the corresponding subject object.
+                     Precondition: Subject names in the database are unique
+                   - Second sorted map (second elt in pair): Mapping subject names with a boolean indicating whether the
+                     subject designated by its names is associated with the current user or not
+                     Precondition: Subject names in the database are unique
+                      NB: Sorted map because the list of all subjects needs to be sorted for the alphabet scroller to work*/
+                final Pair<Map<String, Subject>, Map<String, Boolean>> pairOfMapSubjects =
+                        populateMappingUserSubject(checked_subjects, all_app_subjects);
 
                 // Alphabetik implementation
                 Alphabetik alphabetik = findViewById(R.id.alphSectionIndex);
                 final ListView listView=(ListView)findViewById(R.id.listView);
-                final CheckboxArrayAdapter adapter = new CheckboxArrayAdapter(UserProfileEditActivity.this, all_app_subjects, mapping_user_subjects);
+                final CheckboxArrayAdapter adapter = new CheckboxArrayAdapter(UserProfileEditActivity.this,
+                        pairOfMapSubjects.second.keySet().toArray(new String[0]),
+                        pairOfMapSubjects.second);
                 listView.setAdapter(adapter);
                 listView.setItemsCanFocus(false);
                 listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE); //List allows multiple choices
 
                 //Set alphabet relevant with the subjects' names
-                String[] alphabet = getCustomAlphabet(all_app_subjects);
+                String[] alphabet = getCustomAlphabet(pairOfMapSubjects.second.keySet());
                 alphabetik.setAlphabet(alphabet);
 
                 alphabetik.onSectionIndexClickListener(new Alphabetik.SectionIndexClickListener() {
                     @Override
                     public void onItemClick(View view, int position, String character) {
-                        listView.smoothScrollToPosition(getPositionFromData(character, all_app_subjects));
+                        listView.smoothScrollToPosition(getPositionFromData(character,
+                                new ArrayList<>(pairOfMapSubjects.first.keySet())));
                     }
                 });
 
@@ -129,15 +138,28 @@ public class UserProfileEditActivity extends AppCompatActivity {
                 fab_save.setOnClickListener (new View.OnClickListener () {
                     @Override
                     public void onClick (View view) {
-                        List<String> checked_subjects = new ArrayList<>();
+                        final Map<String, Subject> checked_subjects = new HashMap<>();
                         Map<String, Boolean> updatedUserSubjectMap = adapter.getSubject_map();
                         for (Map.Entry<String, Boolean> entry : updatedUserSubjectMap.entrySet()) {
                             if (entry.getValue()) {
-                                checked_subjects.add(entry.getKey());
+                                checked_subjects.put(Objects.requireNonNull(pairOfMapSubjects.first.get(entry.getKey())).getId(), Objects.requireNonNull(pairOfMapSubjects.first.get(entry.getKey())));
                             }
                         }
 
-                        Log.d("CECILE", checked_subjects.toString());
+                        // Adding subjects to current subject and saving them in the database
+                        UserManager.addSubjects(checked_subjects, new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                //OK
+                                Util.printToast(UserProfileEditActivity.this,"Your selected subjects have been saved",Toast.LENGTH_SHORT);
+                            }
+                        }, new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                //error
+                                Util.printToast(UserProfileEditActivity.this,"Failure: you selected subjects could not be saved. Try later or contact the administrator",Toast.LENGTH_SHORT);
+                            }
+                        });
                     }
                 });
             }
@@ -180,9 +202,8 @@ public class UserProfileEditActivity extends AppCompatActivity {
         }
     }
 
-   /* @Override
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
         switch (item.getItemId()) {
             // Respond to the action bar's Up/Home button
             case android.R.id.home:
@@ -191,7 +212,7 @@ public class UserProfileEditActivity extends AppCompatActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }*/
+    }
 
     /**
      * Uploading a file (in this project a profile picture previously picked from the phone's Photos or Gallery app)
@@ -205,7 +226,7 @@ public class UserProfileEditActivity extends AppCompatActivity {
             progressDialog.setTitle("Uploading...");
             progressDialog.show();
 
-            StorageReference ref = FirebaseStorage.getInstance().getReference().child("images/profile_picture_"+ FirebaseAuth.getInstance().getCurrentUser().getUid());
+            StorageReference ref = FirebaseStorage.getInstance().getReference().child("images/profile_picture_"+ Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid());
             ref.putFile(filePath)
                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
@@ -256,10 +277,10 @@ public class UserProfileEditActivity extends AppCompatActivity {
         TextView subject_list_title = findViewById(R.id.subject_list_name_edit);
         switch (populated_user.getRole()) {
             case STUDENT:
-                subject_list_title.setText("What are your learning needs?");
+                subject_list_title.setText(R.string.learning_needs_txt);
                 break;
             case TUTOR:
-                subject_list_title.setText("What subjects do you wish to tutor?");
+                subject_list_title.setText(R.string.tutoring_subject_choice_txt);
                 break;
         }
     }
@@ -279,11 +300,11 @@ public class UserProfileEditActivity extends AppCompatActivity {
     /**
      * Creates an ordered array of  unique letters corresponding to the letters used as first characters
      * in the items name
-     * @param items List of items name
+     * @param items Sorted det of subjects' name
      * @return ordered array of  unique letters corresponding to the letters used as first characters
      * in the items name
      */
-    private String[] getCustomAlphabet(List<String> items) {
+    private String[] getCustomAlphabet(Set<String> items) {
         Set<String> first_letters = new HashSet<>();
         String[] res;
 
@@ -291,30 +312,40 @@ public class UserProfileEditActivity extends AppCompatActivity {
             first_letters.add(item.substring(0, 1).toUpperCase());
         }
 
-        res = first_letters.toArray(new String[first_letters.size()]);
-        Arrays.sort(res);
+        res = first_letters.toArray(new String[0]);
+        //Arrays.sort(res);
 
         return(res);
     }
 
     /**
-     * Constructs a map (all subjects -> is(un)checked) for a user
-     * @param user_subjects Array of subjects( names associated with a user
-     * @param all_subjects List of all the subjects' names available in the app
-     * @return a map (all subjects -> is(un)checked) for a user
+     * Populating two maps in a pair:
+     * - First map (first elt in pair): Mapping subject names with the corresponding subject object.
+     *   Precondition: Subject names in the database are unique
+     * - Second sorted map (second elt in pair): Mapping subject names with a boolean indicating whether the
+     *   subject designated by its names is associated with the current user or not
+     *   Precondition: Subject names in the database are unique
+     *   NB: Sorted map because the list of all subjects needs to be sorted for the alphabet scroller to work
+     * @param user_subjects List of subjects( names associated with a user
+     * @param all_subjects List of all the subjects available in the app
+     * @return The above-mentioned pair
      */
-    private Map<String, Boolean> populateMappingUserSubject(List<String> user_subjects, List<String> all_subjects) {
-        Map<String, Boolean> res = new HashMap<>();
+    private Pair<Map<String, Subject>, Map<String, Boolean>> populateMappingUserSubject(List<String> user_subjects, List<Subject> all_subjects) {
+        Pair<Map<String, Subject>, Map<String, Boolean>> res;
+        Map<String, Subject> subjectNameMap = new HashMap<>();
+        Map<String, Boolean> subjectChecked = new TreeMap<>();
 
-        //Initial population of the map res: by default all the subjects
-        for (String item:all_subjects) {
-            res.put(item, false);
+        //Subject in res are mapped with true (i.e. checked) if it associated with the user
+        for (Subject item:all_subjects) {
+            if (user_subjects.contains(item.getName())) {
+                subjectChecked.put(item.getName(), true);
+            } else {
+                subjectChecked.put(item.getName(), false);
+            }
+            subjectNameMap.put(item.getName(), item);
         }
 
-        //Update res: set to true (i.e. checked) the subjects associated with the user
-        for (String item:user_subjects) {
-            res.put(item, true); //If key-value already exists, value is overwritten
-        }
+        res = new Pair<>(subjectNameMap, subjectChecked);
 
         return res;
     }

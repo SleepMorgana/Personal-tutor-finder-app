@@ -9,33 +9,37 @@ import android.widget.CheckBox;
 
 import com.example.toto.R;
 
-import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+
 /**
- * TODO Improve comment with correct reference
- * Reference: Adapted from https://github.com/vogellacompany/codeexamples-android/blob/master/com.vogella.android.test.traceview.list/src/de/vogella/android/listactivity/MySimpleArrayAdapter.java
+ * Custom adapter for displaying an array Subject names (can be checked/unchecked)
+ * Adapted from: Vogel L, MySimpleArrayAdapter.java from the android-examples GitHub repository,
+ * https://github.com/vogellacompany/codeexamples-android/blob/master/com.vogella.android.test.traceview.list/src/de/vogella/android/listactivity/MySimpleArrayAdapter.java
  */
 public class CheckboxArrayAdapter extends ArrayAdapter<String> {
     private final Context context;
-    private final List<String> values;
-    private Map<String, Boolean> subject_map;
+    private final String[] values; //Sorted array of subjects' name
+    private Map<String, Boolean> subject_map; /* Mapping subject names with a boolean indicating whether the
+    subject designated by its names is associated with the current user or not */
 
-    public CheckboxArrayAdapter(Context context, List<String> values, Map<String, Boolean> subject_map) {
+    public CheckboxArrayAdapter(Context context, String[] values, Map<String, Boolean> subject_map) {
         super(context, R.layout.checkboxrow, values);
         this.context = context;
         this.values = values;
         this.subject_map = subject_map;
     }
 
+    @Nonnull
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(int position, View convertView, @Nonnull ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View rowView = inflater.inflate(R.layout.checkboxrow, parent, false);
         final CheckBox checkbox=(CheckBox)rowView.findViewById(R.id.checkBox);
-        checkbox.setText(values.get(position));
-        if (subject_map.get(values.get(position))) {
+        checkbox.setText(values[position]);
+        if (subject_map.get(values[position])) {
             checkbox.setChecked(true);
         }
 

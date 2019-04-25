@@ -1,11 +1,9 @@
 package com.example.toto.users;
 
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
-import android.util.Log;
+import android.util.Pair;
 
 import com.example.toto.interfaces.Storable;
 import com.example.toto.sessions.Status;
@@ -20,6 +18,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class User extends Observable implements Storable, Parcelable {
     //combination of FirebaseUser and user from the `users` collection in firestore
@@ -131,23 +131,33 @@ public class User extends Observable implements Storable, Parcelable {
 
     /**
      * Return the alphabetically ordered list of the subjects a student (tutor) wishes to learn (teach)
-     * @return alphabetically ordered list of the subjects a student (tutor) wishes to learn (teach)
+     * @return alphabetically ordered list of the subjects a student (tutor) wishes to learn (teach) //TODO
      */
-    public List<String> getOrderedSubjects() {
-        List<String> res = new ArrayList<>();
+    public Pair<List<String>, String[]> getOrderedSubjects() {
+        Pair<List<String>, String[]> res;
+        List<String> sorted_subject_names = new ArrayList<>();
+        SortedSet<String> ordered_subjects_alphabet = new TreeSet<>();
+        String temp_subject_name;
 
         //Iterate over map values only (no need of the associated keys here)
         for (Subject subject_item: subjects.values()) {
-            res.add(subject_item.getName());
+            temp_subject_name = subject_item.getName();
+            sorted_subject_names.add(temp_subject_name);
+            ordered_subjects_alphabet.add(temp_subject_name.substring(0, 1).toUpperCase());
         }
 
         //Sorting the list of subjects' name by alphabetical order (case sensitive)
-        Collections.sort(res, new Comparator<String>() {
+        Collections.sort(sorted_subject_names, new Comparator<String>() {
             @Override
             public int compare(String s1, String s2) {
                 return s1.compareTo(s2);
             }
         });
+
+        // Convert the ordered_subjects_alphabet tree set to an array (which will be sorted)
+        // ordered_subjects_alphabet.toArray(new String[0]);
+
+        res = new Pair<>(sorted_subject_names, ordered_subjects_alphabet.toArray(new String[0]));
 
         return res;
     }
@@ -174,6 +184,10 @@ public class User extends Observable implements Storable, Parcelable {
     }
 
     public Map<String,Subject> flatten2(Map<String,Map<String,Object>> map){
+        //null check
+        if (map==null){
+            return new HashMap<>();
+        }
         Map<String,Subject> newMap = new HashMap<>();
         for(Map.Entry<String, Map<String,Object>> entry : map.entrySet()) {
             newMap.put(entry.getKey(), new Subject(entry.getKey(),(String) entry.getValue().get("Name")));

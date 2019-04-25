@@ -27,7 +27,7 @@
     <string name="nav_header_title">Android Studio</string>
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
-    <string name="placeholder">...</string>
+    <string name="placeholder">…</string>
     <string name="accept_action">Accept</string>
     <string name="decline_action">Decline</string>
     <string name="tutor_admin_page">Tutors</string>
@@ -35,4 +35,13 @@
     <string name="edit_pen_button_description">Edit profile picture button</string>
     <string name="log_out_text">Sign out</string>
     <string name="search_tutors_text">Search Tutors</string>
+    <string name="or_text">OR</string>
+    <string name="search_tutors_option1_txt">Search based on your learning needs:</string>
+    <string name="search_tutors_option2_txt">Search based on selected subjects:</string>
+    <string name="learning_needs_txt">What are your learning needs?</string>
+    <string name="tutoring_subject_choice_txt">What subjects do you wish to tutor?</string>
+    <string name="my_learning_needs_txt">My learning needs:</string>
+    <string name="subjects_taught_txt">The subjects I can teach:</string>
+    <string name="no_subjects_specified">You do not have specified any subjects yet. Please edit your profile to add subjects</string>
+    <string name="search_txt">Search</string>
 </resources>

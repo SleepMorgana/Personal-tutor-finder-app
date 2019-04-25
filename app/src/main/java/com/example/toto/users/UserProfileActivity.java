@@ -2,9 +2,11 @@ package com.example.toto.users;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,28 +18,27 @@ import android.widget.TextView;
 import com.alphabetik.Alphabetik;
 import com.example.toto.R;
 
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 
 public class UserProfileActivity extends AppCompatActivity{
 
     private ListView listView;
+    private Pair<List<String>, String[]> orderedSubjects;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_profile);
 
+        //Enable the Up button
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        // add back arrow to toolbar
-        if (getSupportActionBar() != null){
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setDisplayShowHomeEnabled(true);
+        ActionBar ab = getSupportActionBar(); // Get a support ActionBar corresponding to this toolbar
+        if (ab != null) {
+            ab.setDisplayHomeAsUpEnabled(true);
+            ab.setDisplayShowHomeEnabled(true);
         }
 
         //Current user
@@ -74,8 +75,11 @@ public class UserProfileActivity extends AppCompatActivity{
         switch (item.getItemId()) {
             // Edit button clicked, go to the edit profile activity
             case R.id.editprofile_button_id: //cf. menu folder
+                // Go to the edit user profile activity
                 Intent intent = new Intent(UserProfileActivity.this, UserProfileEditActivity.class);
+                intent.putStringArrayListExtra("user_ordered_subject_names", (ArrayList<String>) orderedSubjects.first);
                 startActivity(intent);
+                return true;
             // Respond to the action bar's Up/Home button
             case android.R.id.home:
                 finish(); // close this activity and return to preview activity (if there is any)
@@ -112,23 +116,23 @@ public class UserProfileActivity extends AppCompatActivity{
      */
     private void renderSubjects(User populated_user) {
         //Alphabetically ordered list of learning needs (student) or tutoring subjects (tutors)
-        final List<String> orderedSubjects = populated_user.getOrderedSubjects();
+        orderedSubjects = populated_user.getOrderedSubjects();
 
         // Title of the list depends on the role of the user
         TextView subject_list_title = findViewById(R.id.subject_list_name);
         switch (populated_user.getRole()) {
             case STUDENT:
-                subject_list_title.setText("My learning needs:");
+                subject_list_title.setText(R.string.my_learning_needs_txt);
                 break;
             case TUTOR:
-                subject_list_title.setText("The subjects I can teach:");
+                subject_list_title.setText(R.string.subjects_taught_txt);
                 break;
         }
 
         // Display instructions on how to add subjects if the user's subject list is empty
-        if (orderedSubjects.size() == 0) {
+        if (orderedSubjects.first.size() == 0) {
             TextView instructions = findViewById(R.id.subjects_instructions_id);
-            instructions.setText("You don't have specified any subjects yet. Please edit your profile to add subjects");
+            instructions.setText(R.string.no_subjects_specified);
             //Hide alphabet scroller on the right side
             View alphabetScroller = findViewById(R.id.alphSectionIndex);
             alphabetScroller.setVisibility(View.INVISIBLE);
@@ -137,12 +141,11 @@ public class UserProfileActivity extends AppCompatActivity{
         } else {
             Alphabetik alphabetik = findViewById(R.id.alphSectionIndex);
             listView = findViewById(R.id.listView); //Listview implementation, with SORTED list of DATA
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, orderedSubjects);
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, orderedSubjects.first);
             listView.setAdapter(adapter);
 
             //Set alphabet relevant with the subjects' names
-            String[] alphabet = getCustomAlphabet(orderedSubjects);
-            alphabetik.setAlphabet(alphabet);
+            alphabetik.setAlphabet(orderedSubjects.second);
 
             alphabetik.onSectionIndexClickListener(new Alphabetik.SectionIndexClickListener() {
                 @Override
@@ -150,30 +153,9 @@ public class UserProfileActivity extends AppCompatActivity{
                     String info = " Position = " + position + " Char = " + character;
                     Log.i("View: ", view + "," + info);
                     //Toast.makeText(getBaseContext(), info, Toast.LENGTH_SHORT).show();
-                    listView.smoothScrollToPosition(getPositionFromData(character, orderedSubjects));
+                    listView.smoothScrollToPosition(getPositionFromData(character, orderedSubjects.first));
                 }
             });
         }
-    }
-
-    /**
-     * Creates an ordered array of  unique letters corresponding to the letters used as first characters
-     * in the items name
-     * @param items List of items name
-     * @return ordered array of  unique letters corresponding to the letters used as first characters
-     * in the items name
-     */
-    private String[] getCustomAlphabet(List<String> items) {
-        Set<String> first_letters = new HashSet<>();
-        String[] res;
-
-        for (String item:items) {
-            first_letters.add(item.substring(0, 1).toUpperCase());
-        }
-
-        res = first_letters.toArray(new String[first_letters.size()]);
-        Arrays.sort(res);
-
-        return(res);
     }
 }
