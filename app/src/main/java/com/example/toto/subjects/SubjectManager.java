@@ -12,7 +12,6 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 public class SubjectManager {
     private static final SubjectDatabaseHelper db = new SubjectDatabaseHelper();
-
     //create
     public static void addNewSubject(final Subject subject, @NonNull final OnSuccessListener<Void> successListener, @NonNull final OnFailureListener failureListener){
         if (subject==null){

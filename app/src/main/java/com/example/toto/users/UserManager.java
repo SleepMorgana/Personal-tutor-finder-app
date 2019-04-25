@@ -37,7 +37,7 @@ import java.util.concurrent.Future;
 //Use the UserManager to manage the state of the logged-in user
 public class UserManager {
     private static UserController currentUser;
-    private static UserDatabaseHelper userDb = null;
+    private static final UserDatabaseHelper userDb = new UserDatabaseHelper();;
 
     //acts as an initializer
     private static void initCurrentUser(final User user,@NonNull final OnSuccessListener listener,@NonNull final OnFailureListener failureListener) throws RuntimeException {
@@ -272,7 +272,7 @@ public class UserManager {
     //Add already existing subject to current user
     public static void addSubject(Subject subject, OnSuccessListener success, OnFailureListener error){
         currentUser.getUser().addSubject(subject);
-        new UserDatabaseHelper().upsert(currentUser.getUser(),success,error);
+        getDbInstance().upsert(currentUser.getUser(),success,error);
     }
 
     /**
@@ -283,13 +283,13 @@ public class UserManager {
      */
     public static void addSubjects(Map<String,Subject> subjects, final OnSuccessListener success, final OnFailureListener error){
         currentUser.getUser().setSubjects(subjects);
-        new UserDatabaseHelper().upsert(currentUser.getUser(),success,error);
+        getDbInstance().upsert(currentUser.getUser(),success,error);
     }
 
     //Remove subject from current user
     public static void removeSubject(Subject subject, OnSuccessListener success, OnFailureListener error){
         currentUser.getUser().removeSubject(subject);
-        new UserDatabaseHelper().upsert(currentUser.getUser(),success,error);
+        getDbInstance().upsert(currentUser.getUser(),success,error);
     }
 
     //
@@ -302,7 +302,7 @@ public class UserManager {
             return;
         }
         user.setStatus(Status.ACCEPTED);
-        new UserDatabaseHelper().upsert(user, success, error);
+        getDbInstance().upsert(user, success, error);
     }
 
     public static void declineTutorRequest(User user, OnSuccessListener<Void> success, OnFailureListener error){
@@ -311,7 +311,7 @@ public class UserManager {
             return;
         }
         user.setStatus(Status.DECLINED);
-        new UserDatabaseHelper().upsert(user, success, error);
+        getDbInstance().upsert(user, success, error);
     }
 
     public static void retrievePendingTutors(OnSuccessListener<QuerySnapshot> success, OnFailureListener error){
@@ -350,9 +350,6 @@ public class UserManager {
     }
 
     private static UserDatabaseHelper getDbInstance(){
-        if (userDb!=null)
-            return userDb;
-        userDb = new UserDatabaseHelper();
         return userDb;
     }
 

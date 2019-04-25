@@ -13,13 +13,12 @@ import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.QuerySnapshot;
 
 public abstract class DatabaseHelper<T extends Storable> {
-    private static String COLLECTION_NAME;// collection where the entity is situated
-    protected static FirebaseFirestore db;
-    private static String TAG;
+    private String COLLECTION_NAME;// collection where the entity is situated
+    protected FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private String TAG;
 
     public DatabaseHelper(String collectionName, String tag){
         COLLECTION_NAME = collectionName;
-        db = FirebaseFirestore.getInstance();
         TAG = tag;
         FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
                 .setTimestampsInSnapshotsEnabled(true)
