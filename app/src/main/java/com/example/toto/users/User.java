@@ -181,6 +181,17 @@ public class User extends Observable implements Storable, Parcelable {
         return res;
     }
 
+    public List<String> getSubjectNames(){
+        List<String> list = new ArrayList<>();
+        if (subjects==null){
+            return list;
+        }
+        for(Map.Entry<String, Subject> entry : subjects.entrySet()) {
+            list.add(((Subject)entry.getValue()).getName());
+        }
+        return list;
+    }
+
     public Map<String, Object> marshal(){
         //the Id must be fetch from the instance, in firestore document ids aren't in the map
         Map<String, Object> user = new HashMap<>();
@@ -242,6 +253,9 @@ public class User extends Observable implements Storable, Parcelable {
         dest.writeString(this.email);
         dest.writeString(this.role.toString());
         dest.writeString(this.id);
+        dest.writeMap(this.subjects);
+        dest.writeList(this.sessionIds);
+        dest.writeList(this.sessions);
         //dest.writeString(this.status.toString()); TODO instantiation to avoid null
     }
 
@@ -267,6 +281,9 @@ public class User extends Observable implements Storable, Parcelable {
         email = in.readString();
         role = Role.valueOf(in.readString());
         this.id = in.readString();
+        in.readMap(subjects,Subject.class.getClassLoader());
+        in.readList(sessionIds,String.class.getClassLoader());
+        in.readList(sessions, Session.class.getClassLoader());
         //this.status = Status.valueOf(in.readString()); TODO instantiation to avoid null
     }
 }

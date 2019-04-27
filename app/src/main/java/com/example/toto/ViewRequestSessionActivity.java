@@ -1,0 +1,194 @@
+package com.example.toto;
+
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.example.toto.sessions.Session;
+import com.example.toto.sessions.Status;
+import com.example.toto.users.User;
+import com.example.toto.users.UserManager;
+import com.example.toto.utils.Util;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.squareup.timessquare.CalendarPickerView;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+
+public class ViewRequestSessionActivity extends AppCompatActivity {
+    private Session session;
+    private Context mContext;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_view_request_session);
+        //Enable the Up button
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        ActionBar ab = getSupportActionBar(); // Get a support ActionBar corresponding to this toolbar
+        if (ab != null) {
+            ab.setDisplayHomeAsUpEnabled(true);
+            ab.setDisplayShowHomeEnabled(true);
+        }
+
+        mContext =this;
+
+        //Selected session, probably through intent element
+        Intent intent = getIntent();//TODO flag name must be changed
+        session = intent.getParcelableExtra("selectedItem");
+
+        //if the user sent the request show Target as the image user
+        String userView = (UserManager.getUserInstance().getUser().getId().equals(session.getTarget()))?
+           session.getSender(): session.getTarget();
+
+        UserManager.retrieveUserById(userView, new OnSuccessListener<User>() {
+            @Override
+            public void onSuccess(User user) {
+                //Render the user's identity
+                updateUserIdentity(user);
+                //
+            }
+        }, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                //There was an error getting the sender quit activity
+                Util.printToast(mContext,"There was an issue retrieving the session's sender",Toast.LENGTH_LONG);
+                finish();
+            }
+        });
+
+
+
+        //Session subject
+        TextView subject = (TextView) findViewById(R.id.selected_subject);
+        subject.setText(session.getSubject());
+
+        //Set time
+        final EditText timebox = (EditText) findViewById(R.id.time_edit_text);
+        List<Date> selectedDates = session.getDates();
+        if (selectedDates.size()>0)
+            timebox.setText(+selectedDates.get(0).getHours()+":"+selectedDates.get(0).getMinutes());
+
+        final CalendarPickerView calendarView = (CalendarPickerView ) findViewById(R.id.calendar_view);
+        //getting current
+        Calendar nextYear = Calendar.getInstance();
+        nextYear.add(Calendar.YEAR, 1);
+
+        Log.d(Util.TAG,"Date: "+selectedDates.size());
+        Log.d(Util.TAG,"TS: "+session.getTimestamps().size());
+        if (selectedDates.size()>0)
+            calendarView.init(selectedDates.get(0),nextYear.getTime())
+                    .inMode(CalendarPickerView.SelectionMode.SINGLE);
+        else
+            calendarView.init(new Date(),nextYear.getTime())
+                    .inMode(CalendarPickerView.SelectionMode.SINGLE);
+
+        //Set dates
+        for (Date date : selectedDates){
+            calendarView.selectDate(date);
+        }
+
+        //Accept
+        Button accept = (Button) findViewById(R.id.accept_request_button);
+        accept.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                UserManager.acceptSession(session, new OnSuccessListener() {
+                    @Override
+                    public void onSuccess(Object o) {
+                        Util.printToast(mContext,"Request accepted",Toast.LENGTH_LONG);
+                    }
+                }, new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Util.printToast(mContext,"There was an issue accepting the request, please try again",Toast.LENGTH_LONG);
+                    }
+                });
+            }
+        });
+
+        //Decline
+        Button decline = (Button) findViewById(R.id.decline_request_button);
+        decline.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Util.makeDialog("You are about to decline this request"
+                        , "If you wish to suggest another time, please get in touch with the student to ask for a change of time before declining",
+                        "Continue", "Cancel", mContext, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                //Continue
+                                UserManager.declineSession(session, new OnSuccessListener() {
+                                    @Override
+                                    public void onSuccess(Object o) {
+                                        Util.printToast(mContext,"The session was declined",Toast.LENGTH_LONG);
+                                    }
+                                }, new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Util.printToast(mContext,"There was an issue declining the request, please try again",Toast.LENGTH_LONG);
+                                    }
+                                });
+                                dialog.dismiss();
+                            }
+                        }, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                //cancel
+                                dialog.dismiss();
+                                return;
+                            }
+                        }).show();
+            }
+        });
+
+        //hide control button if the request is not PENDING
+        if (!session.getStatus().equals(Status.PENDING)){
+            accept.setVisibility(View.GONE);
+            decline.setVisibility(View.GONE);
+        }
+    }
+
+    /**
+     * Render the current user's identity (i.e. username, email address, profile picture)
+     * @param populated_user current logged-in user
+     */
+    private void updateUserIdentity(User populated_user) {
+        /*By default the profile picture is a gender-neutral avatar, unless he/she has uploaded his/her
+        own profile picture which must then be displayed instead of the default avatar */
+        if (populated_user.getProfile_picture() != null) {
+            ImageView profile_pic_view = (ImageView) findViewById(R.id.profile_picture_view_id);
+            profile_pic_view.setImageBitmap(populated_user.getProfile_picture());
+        }
+
+        //Update navigation menu with the logged-in user's info
+        //Username
+        TextView text_view = findViewById(R.id.username_profile_id);
+        text_view.setText(populated_user.getUsername());
+        //Email
+        text_view = findViewById(R.id.email_profile_id);
+        text_view.setText(populated_user.getEmail());
+    }
+}

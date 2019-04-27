@@ -1,16 +1,24 @@
 package com.example.toto.sessions;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.util.Log;
+
 import com.example.toto.interfaces.Storable;
+import com.example.toto.users.Role;
+import com.example.toto.utils.Util;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 
-public class Session extends Observable implements Storable {
+public class Session extends Observable implements Storable , Parcelable {
     private String subject;//id
     private String sender;//id
     private String target;//id
@@ -48,10 +56,6 @@ public class Session extends Observable implements Storable {
         setChanged();
     }
 
-    public void addDate(Date date){
-        //TODO
-    }
-
     public void addDate(String timestamp){
         dates.add((Object)timestamp);
         setChanged();
@@ -82,8 +86,18 @@ public class Session extends Observable implements Storable {
         return subject;
     }
 
-    public List<Object> getDates() {
+    public List<Object> getTimestamps() {
         return dates;
+    }
+
+    public List<Date> getDates(){
+        List<Date> tmp = new ArrayList<>();
+        for (Object day : this.dates){
+            Calendar dayCalendar = GregorianCalendar.getInstance();
+            dayCalendar.setTimeInMillis(Long.parseLong((String)day));
+            tmp.add(dayCalendar.getTime());
+        }
+        return tmp;
     }
 
     @Override
@@ -109,5 +123,60 @@ public class Session extends Observable implements Storable {
         if (o instanceof Session)
             return ((Session) o).id.equals(this.id);
         return false;
+    }
+
+    /**
+     * describeContents method for a Parcelable class (in this project, such class(es) has(have) no
+     * child classes)
+     * @return 0. Parcelable class(es) in this project has(have) no child classes
+     */
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    /**
+     * Write an object to a parcel
+     * @param dest The Parcel in which the object should be written
+     * @param flags Additional flags about how the object should be written
+     */
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.target);
+        dest.writeString(this.sender);
+        dest.writeString(this.subject);
+        dest.writeString(this.id);
+        dest.writeList(this.dates);
+        if (status!=null)
+            dest.writeString(this.status.toString());
+        else
+            dest.writeString(Status.PENDING.toString());
+        //dest.writeString(this.status.toString()); TODO instantiation to avoid null
+    }
+
+    /**
+     * Regenerate the object from parcel
+     */
+    public static final Creator<Session> CREATOR = new Creator<Session>() {
+        public Session createFromParcel(Parcel in) {
+            return new Session(in);
+        }
+
+        public Session[] newArray(int size) {
+            return new Session[size];
+        }
+    };
+
+    /**
+     * Constructor that takes a parcel and construct a populated user object
+     * @param in parcel
+     */
+    private Session(Parcel in) {
+        target = in.readString();
+        sender = in.readString();
+        this.subject = in.readString();
+        this.id = in.readString();
+        in.readList(dates,String.class.getClassLoader());
+        this.status = Status.valueOf(in.readString()); //TODO instantiation to avoid null
     }
 }

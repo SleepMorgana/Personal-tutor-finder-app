@@ -29,6 +29,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Observer;
 import java.util.concurrent.CompletableFuture;
@@ -394,6 +395,26 @@ public class UserManager {
         getDbInstance().upsert(currentUser.getUser(),success,error);
     }
 
+    //fetches user from db
+    public static void retrieveUserById(@NonNull String userId,@NonNull final OnSuccessListener<User> success
+            , @NonNull final OnFailureListener listener){
+        if (userId.equals("")){
+            listener.onFailure(new UnsupportedOperationException("Invalid user id"));
+            return;
+        }
+
+        getDbInstance().getById(userId, new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful() && task.getResult()!=null){
+                    User user = new User(task.getResult());
+                    success.onSuccess(user);
+                }else{
+                    listener.onFailure(new IllegalStateException());
+                }
+            }
+        });
+    }
     //
     /*
         ADMIN COMMANDS
