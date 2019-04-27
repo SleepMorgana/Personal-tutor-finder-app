@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import android.util.Pair;
 
 import com.example.toto.interfaces.Storable;
+import com.example.toto.sessions.Session;
 import com.example.toto.sessions.Status;
 import com.example.toto.subjects.Subject;
 import com.google.firebase.auth.FirebaseUser;
@@ -30,6 +31,8 @@ public class User extends Observable implements Storable, Parcelable {
     private Bitmap profile_picture;
     private Status status; // for tutors
     private Map<String,Subject> subjects = new HashMap<>();
+    private List<Object> sessionIds = new ArrayList<>();// just use .toString()
+    private List<Session> sessions = new ArrayList<>();
 
 
     public User(DocumentSnapshot user){
@@ -40,6 +43,7 @@ public class User extends Observable implements Storable, Parcelable {
         if (role.equals(Role.TUTOR))
             status = Status.valueOf((String)user.getData().get("Status"));
         subjects = flatten2((Map<String, Map<String, Object>>) user.getData().get("Subjects"));
+        sessionIds = user.contains("Sessions")? ((List<Object>) user.getData().get("Sessions")): new ArrayList<>();
     }
 
     public User(String username,String email, Role role,String id, Status status){
@@ -95,6 +99,15 @@ public class User extends Observable implements Storable, Parcelable {
         }
     }
 
+    public void addSession(Session session){
+        if (!sessions.contains(session)){
+            if (!sessionIds.contains(session.getId()))
+                sessionIds.add(session.getId());
+            sessions.add(session);
+            setChanged();
+        }
+    }
+
     public Role getRole() {
         return role;
     }
@@ -125,6 +138,14 @@ public class User extends Observable implements Storable, Parcelable {
 
     public Map<String, Subject> getSubjects() {
         return subjects;
+    }
+
+    public List<Object> getSessionIds() {
+        return sessionIds;
+    }
+
+    public List<Session> getSessions() {
+        return sessions;
     }
 
     /**
@@ -169,6 +190,7 @@ public class User extends Observable implements Storable, Parcelable {
         if (role.equals(Role.TUTOR))
             user.put("Status", status.toString());
         user.put("Subjects",flatten(subjects));
+        user.put("Sessions", (sessionIds));
 
         return user;
     }

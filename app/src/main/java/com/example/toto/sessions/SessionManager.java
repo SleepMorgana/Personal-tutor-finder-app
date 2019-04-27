@@ -16,15 +16,17 @@ public class SessionManager {
         getDbInstance().getById(id,listener);
     }
 
-    public static void addNewSession(Session session,@NonNull OnSuccessListener<Void> success, @NonNull OnFailureListener error){
+    public static void addNewSession(final Session session, @NonNull final OnSuccessListener<Void> success, @NonNull final OnFailureListener error){
         if (session==null)
-            return;
-        new SessionDatabaseHelper().upsert(session, success, error);
-        //TODO add session to both sender and target
-        //sender
-        UserManager.addSession(session);
-        //target
-        UserManager.addSession(session.getTarget(),session,error);
+            error.onFailure(new UnsupportedOperationException("session is null"));
+
+        getDbInstance().upsert(session, success, error);
+    }
+
+    public static void updateSession(final Session session, @NonNull final OnSuccessListener<Void> success, @NonNull final OnFailureListener error){
+        if (session==null)
+            error.onFailure(new UnsupportedOperationException("session is null"));
+        getDbInstance().upsert(session, success, error);
     }
 
     private static SessionDatabaseHelper getDbInstance(){
