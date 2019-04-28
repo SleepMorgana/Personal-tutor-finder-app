@@ -19,6 +19,10 @@ import android.widget.TextView;
 
 import com.example.toto.R;
 import com.example.toto.SignInSignUp;
+import com.example.toto.queue.channelRcv.OnQueueMessageArrive;
+import com.example.toto.queue.channelRcv.QueueService;
+import com.example.toto.queue.channelTransmission.RabbitQueueHelper;
+import com.example.toto.queue.messages.RxAbstractMessage;
 import com.example.toto.users.User;
 import com.example.toto.users.UserManager;
 import com.example.toto.users.UserProfileActivity;

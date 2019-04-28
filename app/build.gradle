@@ -52,6 +52,8 @@ dependencies {
     annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
     implementation 'com.github.richimf:Alphabetik:1.0.3'
     implementation 'com.squareup:android-times-square:1.6.5@aar'
+    compile 'com.rabbitmq:amqp-client:4.+'
+    compile 'com.github.stfalcon:chatkit:0.3.3'
 }
 
 apply plugin: 'com.google.gms.google-services'

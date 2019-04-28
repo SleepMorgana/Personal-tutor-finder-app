@@ -6,6 +6,12 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.widget.Toast;
 
+import com.example.toto.queue.channelRcv.QueueService;
+import com.example.toto.queue.channelTransmission.ChannelSingleton;
+
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
+
 public class SplashActivity extends Activity {
     //Use splash screen to perform checks on device, like if the device is connected to
     //the network or the user as already logged in
@@ -19,7 +25,17 @@ public class SplashActivity extends Activity {
             public void run() {
                 try {
                     super.run();
-                    sleep(2000);  //Delay of 2 seconds
+
+                    //initializing queue
+                    try {
+                        ChannelSingleton.getInstance();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (TimeoutException e) {
+                        e.printStackTrace();
+                    }
+                    sleep(3500);  //Delay of 3.5 seconds
+
                 } catch (Exception e) {
                     Toast.makeText(getApplicationContext(), "There were some issues loading the application, please try again later",
                             Toast.LENGTH_SHORT).show();
