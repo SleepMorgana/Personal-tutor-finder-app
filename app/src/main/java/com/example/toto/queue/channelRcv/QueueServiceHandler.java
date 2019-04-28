@@ -1,6 +1,9 @@
 package com.example.toto.queue.channelRcv;
 
+import android.util.Log;
+
 import com.example.toto.queue.messages.RxAbstractMessage;
+import com.example.toto.utils.Util;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Consumer;
 import com.rabbitmq.client.DefaultConsumer;
@@ -30,6 +33,7 @@ public class QueueServiceHandler extends AbstractQueueServiceHandler{
                                        AMQP.BasicProperties properties, byte[] body)
                     throws IOException {
                 String message = new String(body, "UTF-8");
+                Log.d(Util.TAG,"message ok");
                 for (OnQueueMessageArrive l : messageListener)
                     l.messageReady(new RxAbstractMessage(message));
             }

@@ -4,6 +4,9 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.util.Log;
+
+import com.example.toto.utils.Util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +23,7 @@ public class QueueService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        Log.d(Util.TAG,"service ok");
         Thread queueThread = new Thread(handleMessage);
         queueThread.start();
     }

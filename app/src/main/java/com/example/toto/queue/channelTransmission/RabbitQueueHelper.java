@@ -1,14 +1,21 @@
 package com.example.toto.queue.channelTransmission;
 
 import android.support.annotation.NonNull;
+import android.util.JsonWriter;
 
 import com.example.toto.queue.Address;
 import com.example.toto.queue.messages.RxAbstractMessage;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.gson.JsonParser;
+import com.google.gson.stream.JsonReader;
 import com.rabbitmq.client.Channel;
 
 import java.io.IOException;
+import java.io.Reader;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.concurrent.TimeoutException;
 
 public class RabbitQueueHelper{
@@ -38,14 +45,17 @@ public class RabbitQueueHelper{
             public void run() {
                 boolean isSuccessful = false;
                 try {
-                    isSuccessful = sendMessage(message.getTarget(), message.jsonify().getAsString());
+                    Calendar calendar = GregorianCalendar.getInstance();
+                    calendar.setTime(new Date());
+                    message.setTimestamp(""+calendar.getTimeInMillis());
+                    isSuccessful = sendMessage(message.getTarget(), message.jsonify().toString());
                 } catch (IOException e) {
                     failureListener.onFailure(e);
                 } catch (TimeoutException e) {
                     failureListener.onFailure(e);
                 }finally {
                     if (isSuccessful)
-                        successListener.onSuccess(null);
+                        successListener.onSuccess(message);
                     else
                         failureListener.onFailure(new UnsupportedOperationException("unsuccessful delivery"));
                 }
