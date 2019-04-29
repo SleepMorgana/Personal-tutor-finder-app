@@ -10,12 +10,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Spinner;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,17 +26,15 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.squareup.timessquare.CalendarPickerView;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 
 public class ViewRequestSessionActivity extends AppCompatActivity {
     private Session session;
     private Context mContext;
+    public static final String mSessionFlag = "selectedItem";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +53,7 @@ public class ViewRequestSessionActivity extends AppCompatActivity {
 
         //Selected session, probably through intent element
         Intent intent = getIntent();//TODO flag name must be changed
-        session = intent.getParcelableExtra("selectedItem");
+        session = intent.getParcelableExtra(mSessionFlag);
 
         //if the user sent the request show Target as the image user
         String userView = (UserManager.getUserInstance().getUser().getId().equals(session.getTarget()))?
@@ -80,16 +76,17 @@ public class ViewRequestSessionActivity extends AppCompatActivity {
         });
 
 
+        //Dates ListView
+        ListView listView = (ListView) findViewById(R.id.session_date_listview);
+        final ArrayAdapter<String> dateAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,new ArrayList<String>());
+        listView.setAdapter(dateAdapter);
 
         //Session subject
         TextView subject = (TextView) findViewById(R.id.selected_subject);
         subject.setText(session.getSubject());
 
         //Set time
-        final EditText timebox = (EditText) findViewById(R.id.time_edit_text);
         List<Date> selectedDates = session.getDates();
-        if (selectedDates.size()>0)
-            timebox.setText(+selectedDates.get(0).getHours()+":"+selectedDates.get(0).getMinutes());
 
         final CalendarPickerView calendarView = (CalendarPickerView ) findViewById(R.id.calendar_view);
         //getting current
@@ -100,14 +97,15 @@ public class ViewRequestSessionActivity extends AppCompatActivity {
         Log.d(Util.TAG,"TS: "+session.getTimestamps().size());
         if (selectedDates.size()>0)
             calendarView.init(selectedDates.get(0),nextYear.getTime())
-                    .inMode(CalendarPickerView.SelectionMode.SINGLE);
+                    .inMode(CalendarPickerView.SelectionMode.MULTIPLE);
         else
             calendarView.init(new Date(),nextYear.getTime())
-                    .inMode(CalendarPickerView.SelectionMode.SINGLE);
+                    .inMode(CalendarPickerView.SelectionMode.MULTIPLE);
 
         //Set dates
         for (Date date : selectedDates){
             calendarView.selectDate(date);
+            dateAdapter.add(date.toString());
         }
 
         //Accept

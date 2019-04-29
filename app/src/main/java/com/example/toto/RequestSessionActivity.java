@@ -1,20 +1,20 @@
 package com.example.toto;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CalendarView;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,11 +34,14 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class RequestSessionActivity extends AppCompatActivity {
     private User tutor;
     private Context mContext;
+    public static final String mTutorFlag = "selectedItem";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,18 +60,24 @@ public class RequestSessionActivity extends AppCompatActivity {
 
         //Selected tutor user, probably through intent element
         Intent intent = getIntent();//TODO flag name must be changed
-        tutor = intent.getParcelableExtra("selectedItem");
+        tutor = intent.getParcelableExtra(mTutorFlag);
 
         //Render the user's identity
         updateUserIdentity(tutor);
 
 
 
+        //Dates ListView
+        ListView listView = (ListView) findViewById(R.id.session_date_listview);
+        final ArrayAdapter<String> dateAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,new ArrayList<String>());
+        listView.setAdapter(dateAdapter);
+
         //spinner elements
         Spinner spinner = (Spinner) findViewById(R.id.subject_spinner);
         final List<String> availableSubjects = tutor.getSubjectNames();
         //Session fields
         final String[] selectedSubject = {""};
+        final Map<String,String> selectedDates = new HashMap<>();//key = date; value = date+time
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item,availableSubjects);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -94,10 +103,68 @@ public class RequestSessionActivity extends AppCompatActivity {
 
         calendarView.init(today,nextYear.getTime())
                 .inMode(CalendarPickerView.SelectionMode.MULTIPLE);
-        calendarView.getSelectedDates();
+        calendarView.setOnDateSelectedListener(new CalendarPickerView.OnDateSelectedListener() {
+            @Override
+            public void onDateSelected(final Date date) {
+                //create dialog
+                final EditText editText = new EditText(mContext);
+                editText.setHint("HH:mm");
+                Util.makeInputDialog("Time", "Select a time:", "Confirm", "Cancel", mContext,
+                        editText,new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                //OK
+                                String timeString = (editText.getText()!=null)? editText.getText().toString().toLowerCase().trim() : "";
+                                SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+                                Date time = null;
+                                try {
+                                    time = sdf.parse(timeString);//adding seconds
+                                } catch (ParseException e) {
+                                    Util.printToast(getApplicationContext(),"Invalid time", Toast.LENGTH_SHORT);
+                                    return;
+                                }
+
+                                //create timestamp
+                                Calendar dayCalendar = GregorianCalendar.getInstance();
+                                dayCalendar.setTime(date);
+
+                                Calendar timeCalendar = GregorianCalendar.getInstance();
+                                timeCalendar.setTime(time);   // assigns calendar to given date
+
+                                Calendar finalDay = GregorianCalendar.getInstance(); // creates a new calendar instance
+                                finalDay.set(dayCalendar.get(Calendar.YEAR),
+                                        dayCalendar.get(Calendar.MONTH),dayCalendar.get(Calendar.DAY_OF_MONTH),
+                                        timeCalendar.get(Calendar.HOUR),timeCalendar.get(Calendar.MINUTE));   // assigns calendar to given date
+
+                                selectedDates.put(dayCalendar.getTime().toString(),finalDay.getTimeInMillis()+"");
+                                dateAdapter.add(finalDay.getTime().toString());
+                                dialog.dismiss();
+                            }
+                        }, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                //CANCEL
+                                dialog.dismiss();
+                            }
+                        }).show();
+            }
+
+            @Override
+            public void onDateUnselected(Date date) {
+                selectedDates.remove(date.toString());
+                int flag = 0;
+                for (int i=0; i<dateAdapter.getCount(); i++){
+                    if (dateAdapter.getItem(i).startsWith(date.toString())){
+                        flag=i;
+                        break;
+                    }
+                }
+                dateAdapter.remove(dateAdapter.getItem(flag));
+            }
+        });
 
         //Time box
-        final EditText timebox = (EditText) findViewById(R.id.time_edit_text);
+        //final EditText timebox = (EditText) findViewById(R.id.time_edit_text);
 
         Button button = (Button) findViewById(R.id.request_session_button);
         button.setOnClickListener(new View.OnClickListener() {
@@ -106,45 +173,19 @@ public class RequestSessionActivity extends AppCompatActivity {
                 //create session instance
 
                 if (selectedSubject[0].equals("")){
-                    Util.printToast(getApplicationContext(),"Please select day", Toast.LENGTH_SHORT);
+                    Util.printToast(getApplicationContext(),"Please select subject", Toast.LENGTH_SHORT);
                     return;
                 }
                 Session session = new Session(selectedSubject[0],UserManager.getUserInstance().getUser().getId(),
                         tutor.getId(), Status.PENDING);
 
-                //get time
-                String timeString = (timebox.getText()!=null)? timebox.getText().toString().toLowerCase().trim() : "";
-                SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-                Date time = null;
-                try {
-                    time = sdf.parse(timeString+":00");//adding seconds
-                } catch (ParseException e) {
-                    Util.printToast(getApplicationContext(),"Invalid time", Toast.LENGTH_SHORT);
-                    return;
-                }
-
-
-                List<Date> selectedDates = calendarView.getSelectedDates();
                 if (selectedDates.size()==0){
                     Util.printToast(getApplicationContext(),"Invalid day", Toast.LENGTH_SHORT);
                     return;
                 }
                 //Adding timestamps to session
-                for (Date day : selectedDates){
-                    //create timestamp
-                    Calendar dayCalendar = GregorianCalendar.getInstance();
-                    dayCalendar.setTime(day);
-
-                    Calendar timeCalendar = GregorianCalendar.getInstance();
-                    timeCalendar.setTime(time);   // assigns calendar to given date
-                    int hour = timeCalendar.get(Calendar.HOUR);
-
-                    Calendar finalday = GregorianCalendar.getInstance(); // creates a new calendar instance
-                    finalday.set(dayCalendar.get(Calendar.YEAR),
-                            dayCalendar.get(Calendar.MONTH),dayCalendar.get(Calendar.DAY_OF_MONTH),
-                            timeCalendar.get(Calendar.HOUR),timeCalendar.get(Calendar.MINUTE));   // assigns calendar to given date
-
-                    session.addDate(""+finalday.getTimeInMillis());
+                for (Map.Entry<String,String> day : selectedDates.entrySet()){
+                    session.addDate(day.getValue());
                 }
 
                 //save Session

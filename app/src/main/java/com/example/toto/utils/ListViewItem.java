@@ -5,10 +5,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 
 
-/**
- * Created by Oluwole on 28/05/2017.
- */
-
 public abstract class ListViewItem<T>{
     protected Context context;
     protected T element;
