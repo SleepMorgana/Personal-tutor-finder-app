@@ -18,6 +18,8 @@ import android.widget.TextView;
 
 import com.example.toto.R;
 import com.example.toto.SignInSignUp;
+import com.example.toto.sessions.Status;
+import com.example.toto.users.Role;
 import com.example.toto.users.User;
 import com.example.toto.users.UserManager;
 import com.example.toto.users.UserProfileActivity;

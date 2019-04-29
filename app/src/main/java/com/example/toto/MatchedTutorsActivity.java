@@ -1,20 +1,25 @@
 package com.example.toto;
 
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.Pair;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alphabetik.Alphabetik;
 import com.example.toto.users.User;
 import com.example.toto.users.UserManager;
+import com.example.toto.utils.SearchListViewAdapter;
 import com.example.toto.utils.Util;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -23,6 +28,8 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -51,18 +58,36 @@ public class MatchedTutorsActivity extends AppCompatActivity {
         //Retrieve tutors teaching at least one of subjects from subjects_id_searched
         getMatchedTutors(subjects_id_searched, new OnSuccessListener() {
             @Override
-            public void onSuccess(Object o) {
-                Map<User, List<String>> matched_tutors = (Map<User, List<String>>) o;
-                final List<String> tutors_with_matched_subjects = new ArrayList<>();
+            public void onSuccess(final Object o) {
+                TextView instructions_listview = (TextView) findViewById(R.id.instructions_id);
+                final Map<User, List<String>> matched_tutors = (Map<User, List<String>>) o;
+                final List<Pair<User, String>> user_info_list = new ArrayList<>();
+                final List<String> tutors_with_matched_subjects = new ArrayList<>(); //Tutors usernames, for alphabet scroller
+                Pair<User, String> temp_pair;
 
-                for (Map.Entry<User, List<String>> entry : matched_tutors.entrySet()) {
-                    tutors_with_matched_subjects.add(entry.getKey().getUsername() + ". Matched subjects: " + entry.getValue().toString());
+                //Display a custom instruction, depending on whether tutors matched the search criteria or not
+                if (matched_tutors.size() == 0) { //No tutors matched the search criteria
+                    instructions_listview.setText(R.string.instructions_match1);
+                } else { //Tutors matched the search criteria
+                    instructions_listview.setText(R.string.instructions_match2);
                 }
 
-                //To ontinue here //TODO
-                ArrayAdapter<String> adapter = new ArrayAdapter<>(MatchedTutorsActivity.this, android.R.layout.simple_list_item_1, tutors_with_matched_subjects);
+                for (Map.Entry<User, List<String>> entry : matched_tutors.entrySet()) {
+                    tutors_with_matched_subjects.add(entry.getKey().getUsername());
+
+                    temp_pair = new Pair<>(entry.getKey(), entry.getValue().toString().substring(1,entry.getValue().toString().length()-1));
+                    user_info_list.add(temp_pair);
+                }
+
                 final ListView listView = findViewById(R.id.listView);
-                listView.setAdapter(adapter);
+                //Data need to be ordered for the alphabetical scroller to work properly
+                Collections.sort(user_info_list, new Comparator<Pair<User, String>>() {
+                    @Override
+                    public int compare(Pair<User, String> o1, Pair<User, String> o2) {
+                        return o1.first.getUsername().compareTo(o2.first.getUsername());
+                    }
+                });
+                listView.setAdapter(new SearchListViewAdapter(getBaseContext(), user_info_list));
 
                 //Set alphabet relevant with the subjects' names
                 Alphabetik alphabetik = findViewById(R.id.alphSectionIndex);
@@ -76,6 +101,17 @@ public class MatchedTutorsActivity extends AppCompatActivity {
                         Log.i("View: ", view + "," + info);
                         //Toast.makeText(getBaseContext(), info, Toast.LENGTH_SHORT).show();
                         listView.smoothScrollToPosition(getPositionFromData(character, tutors_with_matched_subjects));
+                    }
+                });
+
+                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        // Get the selected item text from ListView
+                        int pos = parent.getPositionForView(view);
+
+                        // Display the selected item text on TextView
+                        Log.d("CECILE", String.valueOf(pos) + ", " + user_info_list.get(pos).first.getEmail());
                     }
                 });
             }
@@ -113,7 +149,7 @@ public class MatchedTutorsActivity extends AppCompatActivity {
                 for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
                     User user = new User(doc);
 
-                    List<String> matched_subjects = new ArrayList();
+                    List<String> matched_subjects = new ArrayList<>();
 
                     // Iterate over the list of subjects in search criteria
                     for (String subject_id_item:subject_id) {

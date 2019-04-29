@@ -21,6 +21,12 @@
 
     </android.support.design.widget.AppBarLayout>
 
+    <TextView
+        android:id="@+id/instructions_id"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="12dp" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -30,8 +36,8 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:scrollbarStyle="outsideOverlay"
-            android:listSelector="@android:color/transparent"/> <!-- Disable ripple effect -->
+            android:listSelector="@android:color/transparent"
+            android:scrollbarStyle="outsideOverlay" />
 
         <com.alphabetik.Alphabetik
             android:id="@+id/alphSectionIndex"

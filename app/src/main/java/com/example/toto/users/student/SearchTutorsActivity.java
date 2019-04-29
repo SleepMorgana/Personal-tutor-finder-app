@@ -39,6 +39,7 @@ import java.util.TreeMap;
 public class SearchTutorsActivity extends AppCompatActivity {
 
     private List<String> checked_subjects;
+    private Pair<Map<String, Subject>, Map<String, Boolean>> pairOfMapSubjects;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,8 +85,7 @@ public class SearchTutorsActivity extends AppCompatActivity {
                      subject designated by its names is associated with the current user or not
                      Precondition: Subject names in the database are unique
                       NB: Sorted map because the list of all subjects needs to be sorted for the alphabet scroller to work*/
-                final Pair<Map<String, Subject>, Map<String, Boolean>> pairOfMapSubjects =
-                        populateMappingUserSubject(checked_subjects, all_app_subjects);
+                pairOfMapSubjects = populateMappingUserSubject(checked_subjects, all_app_subjects);
 
                 // Alphabetik implementation
                 Alphabetik alphabetik = findViewById(R.id.alphSectionIndex);
@@ -137,7 +137,7 @@ public class SearchTutorsActivity extends AppCompatActivity {
             public void onClick(View v) {
                 //User search criteria = subjects he/she selected in this activity
                 Intent intent = new Intent(SearchTutorsActivity.this, MatchedTutorsActivity.class);
-                intent.putStringArrayListExtra("subjects_id", (ArrayList<String>) checked_subjects);
+                intent.putStringArrayListExtra("subjects_id", (ArrayList<String>) getSubjectsId(checked_subjects, pairOfMapSubjects.first));
                 startActivity(intent);
             }
         });
@@ -218,5 +218,18 @@ public class SearchTutorsActivity extends AppCompatActivity {
             position++;
         }
         return 0;
+    }
+
+    private List<String> getSubjectsId(List<String> subject_names, Map<String, Subject> map_name_subject) {
+        List<String> res = new ArrayList<>();
+
+        for (Map.Entry<String, Subject> entry:map_name_subject.entrySet()) {
+            for (String subject_name:subject_names) {
+                if (entry.getKey().equals(subject_name)) {
+                    res.add(entry.getValue().getId());
+                }
+            }
+        }
+        return res;
     }
 }

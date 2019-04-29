@@ -56,4 +56,7 @@
     <string name="requested_subject">REQUESTED SUBJECT:</string>
     <string name="meeting_invitation_label">MEETING INVITATION:</string>
     <string name="meeting_schedule_label">MEETING SCHEDULE:</string>
+    <string name="matched_subjects_txt">Matched subjects:</string>
+    <string name="instructions_match1">No tutors match your search criteria</string>
+    <string name="instructions_match2">Click on a tutor in the list below to see further details</string>
 </resources>
