@@ -49,4 +49,11 @@
     <string name="save">Save</string>
     <string name="delete">Delete</string>
     <string name="sign_out_txt">Sign Out</string>
+    <string name="create_session_subject">The subject you are interested in</string>
+    <string name="send_request">Send request</string>
+    <string name="pick_subject">Pick a subject</string>
+    <string name="time_label">Time</string>
+    <string name="requested_subject">REQUESTED SUBJECT:</string>
+    <string name="meeting_invitation_label">MEETING INVITATION:</string>
+    <string name="meeting_schedule_label">MEETING SCHEDULE:</string>
 </resources>

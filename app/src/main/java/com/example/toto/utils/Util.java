@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.widget.EditText;
 import android.widget.Toast;
 
 public class Util {
@@ -31,6 +32,19 @@ public class Util {
         AlertDialog mDialog = new AlertDialog.Builder(ctx)
                 .setTitle(title)
                 .setMessage(msg)
+                .setPositiveButton(positiveLabal, positive)
+                .setNegativeButton(negativeLabel, negative)
+                .create();
+
+        return mDialog;
+    }
+
+    public static Dialog makeInputDialog(String title, String msg, String positiveLabal, String negativeLabel, Context ctx,
+                                    EditText text, DialogInterface.OnClickListener positive, DialogInterface.OnClickListener negative){
+        AlertDialog mDialog = new AlertDialog.Builder(ctx)
+                .setTitle(title)
+                .setMessage(msg)
+                .setView(text)
                 .setPositiveButton(positiveLabal, positive)
                 .setNegativeButton(negativeLabel, negative)
                 .create();

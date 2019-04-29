@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.toto.sessions.Session;
+import com.example.toto.sessions.SessionManager;
 import com.example.toto.sessions.Status;
 import com.example.toto.subjects.Subject;
 import com.example.toto.subjects.SubjectManager;
@@ -28,16 +29,22 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Observer;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
 
 //Use the UserManager to manage the state of the logged-in user
 public class UserManager {
     private static UserController currentUser;
-    private static final UserDatabaseHelper userDb = new UserDatabaseHelper();;
+    private static final UserDatabaseHelper userDb = new UserDatabaseHelper();
+    private static final ExecutorService executorService = Executors.newFixedThreadPool(10);
+
 
     //acts as an initializer
     private static void initCurrentUser(final User user,@NonNull final OnSuccessListener listener,@NonNull final OnFailureListener failureListener) throws RuntimeException {
@@ -52,7 +59,17 @@ public class UserManager {
                     if (document.exists()) {
                         Log.d("TUTOR_APP", "DocumentSnapshot data: " + document.getData());
                         currentUser = new UserController(new User(document));
-                        listener.onSuccess(currentUser);
+                        refreshSessions(new OnSuccessListener() {
+                            @Override
+                            public void onSuccess(Object o) {
+                                listener.onSuccess(currentUser);
+                            }
+                        }, new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                failureListener.onFailure(e);
+                            }
+                        });
                     } else {
                         currentUser = new UserController(user);
                         //save the current user in the db, since it wasn't recorded yet
@@ -243,16 +260,41 @@ public class UserManager {
         });
     }
 
-    public static void addSession(@NonNull String userId, final Session session,@NonNull final OnFailureListener listener){
-        if (session == null || userId.equals(""))
+    //Adds a new session object to the session collection
+    //Updates the sender and receiver session collections
+    public static void createSession(final Session session, @NonNull final OnSuccessListener<Void> success, @NonNull final OnFailureListener error){
+        if (session==null)
+            error.onFailure(new UnsupportedOperationException("session is null"));
+
+        SessionManager.addNewSession(session, new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                //sender
+                UserManager.addSession(session, new OnSuccessListener() {
+                    @Override
+                    public void onSuccess(Object o) {
+                        //target
+                        UserManager.addSession(session.getTarget(),session, success,error);
+                    }
+                }, error);
+            }
+        }, error);
+    }
+
+    //fetches user fro db and updates its session collection
+    private static void addSession(@NonNull String userId, final Session session,
+                                  @NonNull final OnSuccessListener success, @NonNull final OnFailureListener listener){
+        if (session == null || userId.equals("")){
+            listener.onFailure(new UnsupportedOperationException("Invalid user id or session entity"));
             return;
+        }
 
         getDbInstance().getById(userId, new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful() && task.getResult()!=null){
                     User user = new User(task.getResult());
-                    addSession(user,session);
+                    addSession(user,session,success,listener);
                 }else{
                     listener.onFailure(new IllegalStateException());
                 }
@@ -260,13 +302,74 @@ public class UserManager {
         });
     }
 
-    public static void addSession(User user, Session session){
-        //TODO add code, update user struct with new session
+    //Updates user session collection
+    private static void addSession(User user, Session session, @NonNull OnSuccessListener success, @NonNull OnFailureListener failure){
+        if (session==null || user==null){
+            failure.onFailure(new UnsupportedOperationException("Invalid user or session entities"));
+            return;
+        }
+        user.addSession(session);
+        getDbInstance().upsert(user,success,failure);
     }
 
     //add session to current user
-    public static void addSession(Session session){
-        addSession(currentUser.getUser(), session);
+    private static void addSession(Session session, @NonNull OnSuccessListener success, @NonNull OnFailureListener failure){
+        addSession(currentUser.getUser(), session, success, failure);
+    }
+
+    //Accept session request: session must be part of the user session collection
+    public static void acceptSession(Session session, @NonNull OnSuccessListener success, @NonNull OnFailureListener failure){
+        if (session==null || !currentUser.getUser().getSessions().contains(session)){
+            failure.onFailure(new UnsupportedOperationException("Invalid session entity"));
+            return;
+        }
+        session.updateStatus(Status.ACCEPTED);
+        SessionManager.updateSession(session,success,failure);
+    }
+
+    //Decline session request: session must be part of the user session collection
+    public static void declineSession(Session session, @NonNull OnSuccessListener success, @NonNull OnFailureListener failure){
+        if (session==null || !currentUser.getUser().getSessions().contains(session)){
+            failure.onFailure(new UnsupportedOperationException("Invalid session entity"));
+            return;
+        }
+        session.updateStatus(Status.DECLINED);
+        SessionManager.updateSession(session,success,failure);
+    }
+
+    public static void addSessionDate(Session session, String timestamp, @NonNull OnSuccessListener success, @NonNull OnFailureListener failure){
+        if (session==null || timestamp==null || !currentUser.getUser().getSessions().contains(session)){
+            failure.onFailure(new UnsupportedOperationException("Invalid session entity"));
+            return;
+        }
+        session.addDate(timestamp);
+        SessionManager.updateSession(session,success,failure);
+    }
+
+    //Refresh user's sessions elements
+    public static void refreshSessions(@NonNull final OnSuccessListener success, @NonNull final OnFailureListener error){
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                for(Object id : currentUser.getUser().getSessionIds()){
+                    //query for each session
+                    SessionManager.retrieveSessionById((String) id, new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if (task.isSuccessful()) {
+                                currentUser.getUser().addSession(new Session(task.getResult()));
+                            }else {
+                                error.onFailure(new UnsupportedOperationException());
+                            }
+                        }
+                    });
+                }
+                while (currentUser.getUser().getSessions().size() !=
+                        currentUser.getUser().getSessionIds().size());
+
+                success.onSuccess(null);
+            }
+        });
     }
 
     //Add already existing subject to current user
@@ -292,6 +395,26 @@ public class UserManager {
         getDbInstance().upsert(currentUser.getUser(),success,error);
     }
 
+    //fetches user from db
+    public static void retrieveUserById(@NonNull String userId,@NonNull final OnSuccessListener<User> success
+            , @NonNull final OnFailureListener listener){
+        if (userId.equals("")){
+            listener.onFailure(new UnsupportedOperationException("Invalid user id"));
+            return;
+        }
+
+        getDbInstance().getById(userId, new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful() && task.getResult()!=null){
+                    User user = new User(task.getResult());
+                    success.onSuccess(user);
+                }else{
+                    listener.onFailure(new IllegalStateException());
+                }
+            }
+        });
+    }
     //
     /*
         ADMIN COMMANDS

@@ -1,6 +1,7 @@
 package com.example.toto;
 
 import com.example.toto.interfaces.DatabaseHelper;
+import com.example.toto.sessions.Session;
 import com.example.toto.sessions.Status;
 import com.example.toto.subjects.Subject;
 import com.example.toto.users.Role;
@@ -80,6 +81,18 @@ public class UserPackageTest {
         expected = new HashMap<>();
         actual = user.flatten2(mock);
         assertEquals(String.valueOf(expected),String.valueOf(actual));
+    }
+
+    @Test
+    public void addSessionToUser(){
+        User user = new User("foo","foo@gmail.com", Role.STUDENT, "id-1", Status.ACCEPTED);
+        User user2 = new User("foo2","foo2@gmail.com", Role.STUDENT, "id-2", Status.ACCEPTED);
+        //String subject,String sender,String target, Status status, String id
+        Session session = new Session("Latin 101", "id-1", "id-2", Status.PENDING, "session-1");
+        user.addSession(session);
+
+        assertEquals(user.getSessionIds().get(0).toString(),session.getId());
+        assertEquals(user.getSessions().get(0),session);
     }
 
 }
