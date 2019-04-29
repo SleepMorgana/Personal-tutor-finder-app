@@ -29,7 +29,6 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.Observer;
 import java.util.concurrent.CompletableFuture;
@@ -237,29 +236,6 @@ public class UserManager {
         }
     }
 
-    /**
-     * Load the profile picture of a currently logged-in user (if any) in the correct container. If the
-     * user has not uploaded a profile picture, a gender neutral avatar is rendered instead (vy default)
-     * @param view_container Container for the profile picture
-     * @param activity_context Context of the current activity
-     */
-    public static void getProfilePicture(final ImageView view_container, final Context activity_context) {
-        final StorageReference storageRef = FirebaseStorage.getInstance().getReference().
-                child("images/profile_picture_"+ FirebaseAuth.getInstance().getCurrentUser().getUid());
-
-        storageRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-            @Override
-            public void onSuccess(Uri uri) {
-                Glide.with(activity_context).load(uri).into(view_container);
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                // File not found. Do nothing, because a default gender-neutral avatar will be displayed instead
-            }
-        });
-    }
-
     //Adds a new session object to the session collection
     //Updates the sender and receiver session collections
     public static void createSession(final Session session, @NonNull final OnSuccessListener<Void> success, @NonNull final OnFailureListener error){
@@ -283,7 +259,7 @@ public class UserManager {
 
     //fetches user fro db and updates its session collection
     private static void addSession(@NonNull String userId, final Session session,
-                                  @NonNull final OnSuccessListener success, @NonNull final OnFailureListener listener){
+                                   @NonNull final OnSuccessListener success, @NonNull final OnFailureListener listener){
         if (session == null || userId.equals("")){
             listener.onFailure(new UnsupportedOperationException("Invalid user id or session entity"));
             return;
@@ -443,6 +419,10 @@ public class UserManager {
             return;
         }
         getDbInstance().getPendingTutors(success,error);
+    }
+
+    public static void retrieveTutorsWithSubjects(OnSuccessListener<QuerySnapshot> success, OnFailureListener error) {
+        getDbInstance().getTutorsWithSubjects(success, error);
     }
 
     //Add new subject to the subject collection

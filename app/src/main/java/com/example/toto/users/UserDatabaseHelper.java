@@ -13,6 +13,8 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.HashMap;
+
 import javax.annotation.Nullable;
 
 public class UserDatabaseHelper extends DatabaseHelper<User> {
@@ -36,7 +38,25 @@ public class UserDatabaseHelper extends DatabaseHelper<User> {
 
     public void getPendingTutors(final OnSuccessListener<QuerySnapshot> successListener, final OnFailureListener failureListener) {
         CollectionReference subjectsRef = db.collection(COLLECTION_NAME);
-        Query query = subjectsRef.whereEqualTo("Status", Status.PENDING.toString());
+        Query query = subjectsRef.whereEqualTo("Role", Role.TUTOR.toString())
+                                 .whereEqualTo("Status", Status.PENDING.toString());
+        query.addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    failureListener.onFailure(e);
+                    return;
+                }
+                successListener.onSuccess(queryDocumentSnapshots);
+            }
+        });
+    }
+
+    public void getTutorsWithSubjects(final OnSuccessListener<QuerySnapshot> successListener, final OnFailureListener failureListener) {
+        CollectionReference tutorsRef = db.collection(COLLECTION_NAME);
+        Query query = tutorsRef.whereEqualTo("Role", Role.TUTOR.toString())
+                               .whereEqualTo("Status", Status.ACCEPTED.toString());
+                               //.whereEqualTo("Subjects", new HashMap<>());
         query.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {

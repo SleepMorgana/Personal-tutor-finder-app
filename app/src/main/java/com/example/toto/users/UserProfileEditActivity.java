@@ -1,5 +1,6 @@
 package com.example.toto.users;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -15,6 +16,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -58,13 +60,14 @@ public class UserProfileEditActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_profile_edit);
         ImageView upload_profile_picture = findViewById(R.id.upload_pic_button_id);
+        final FrameLayout frame = findViewById(R.id.frame);
 
         //Received data (ordered list of the user's subjects names), sent in the previous activity
-        Intent i = getIntent();
+        final Intent i = getIntent();
         final ArrayList<String> checked_subjects = i.getStringArrayListExtra("user_ordered_subject_names");
 
         //Enable the Up button
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ActionBar ab = getSupportActionBar(); // Get a support ActionBar corresponding to this toolbar
         if (ab != null) {
@@ -93,12 +96,21 @@ public class UserProfileEditActivity extends AppCompatActivity {
            from the list of subjects available within the app (i.e. in the database) */
         // Query all subjects available within the app
         SubjectManager.listSubjects(new OnSuccessListener<QuerySnapshot>() {
+            @SuppressLint("RestrictedApi")
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                FloatingActionButton fab_save = (FloatingActionButton) findViewById (R.id.fab_save_id);
                 final ArrayList<Subject> all_app_subjects = new ArrayList<>(); //List of all subjects available in the database
                 for (DocumentSnapshot snapshot : queryDocumentSnapshots){
                     Subject subject = new Subject(snapshot);
                     all_app_subjects.add(subject);
+                }
+
+                //Hanfle the case where there is no subjects available within the app yet
+                if (all_app_subjects.size() == 0) {
+                    Util.printToast(UserProfileEditActivity.this,"There is no subject available yet. Try again later or contact the administrator",Toast.LENGTH_LONG);
+                    //Hide save button
+                    frame.setVisibility(View.GONE);
                 }
 
                 /* Populating two maps in a pair:
@@ -134,7 +146,7 @@ public class UserProfileEditActivity extends AppCompatActivity {
                 });
 
                 //User wants to save his/her changes
-                FloatingActionButton fab_save = (FloatingActionButton) findViewById (R.id.fab_save_id);
+                fab_save.setVisibility(View.VISIBLE);
                 fab_save.setOnClickListener (new View.OnClickListener () {
                     @Override
                     public void onClick (View view) {

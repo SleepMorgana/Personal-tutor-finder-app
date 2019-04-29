@@ -155,13 +155,13 @@ public class UserProfileActivity extends AppCompatActivity{
             //Show instructions for adding subjects when the user has no subjects associated with his profile
             instructions.setVisibility(View.VISIBLE);
             //Hide alphabet scroller on the right side + List of item (indeed, a user can uncheck all his subjects and go back to view his profile)
-            alphabetik.setVisibility(View.INVISIBLE);
-            listView.setVisibility(View.INVISIBLE);
+            alphabetik.setVisibility(View.GONE);
+            listView.setVisibility(View.GONE);
 
         // Alphabetik implementation & ListView population
         } else {
             //Handle visibility
-            instructions.setVisibility(View.INVISIBLE); //Hide instructions for adding subjects when the user has no subjects associated with his profile
+            instructions.setVisibility(View.GONE); //Hide instructions for adding subjects when the user has no subjects associated with his profile
             alphabetik.setVisibility(View.VISIBLE); //Show alphabet scroller
             listView.setVisibility(View.VISIBLE); //Show list of subjects
 
