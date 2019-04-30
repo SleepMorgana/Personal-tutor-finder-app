@@ -1,4 +1,4 @@
-package com.example.toto;
+package com.example.toto.users.student;
 
 import android.content.Intent;
 import android.support.annotation.NonNull;
@@ -11,12 +11,12 @@ import android.util.Pair;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alphabetik.Alphabetik;
+import com.example.toto.R;
 import com.example.toto.users.User;
 import com.example.toto.users.UserManager;
 import com.example.toto.utils.SearchListViewAdapter;
@@ -110,8 +110,10 @@ public class MatchedTutorsActivity extends AppCompatActivity {
                         // Get the selected item text from ListView
                         int pos = parent.getPositionForView(view);
 
-                        // Display the selected item text on TextView
-                        Log.d("CECILE", String.valueOf(pos) + ", " + user_info_list.get(pos).first.getEmail());
+                        // Start a new activity to diplay the user profile of the selected tutor
+                        Intent intent = new Intent(MatchedTutorsActivity.this, ViewTutorProfileActivity.class);
+                        intent.putExtra("selected_tutor", user_info_list.get(pos).first);
+                        startActivity(intent);
                     }
                 });
             }

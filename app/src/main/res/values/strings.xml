@@ -59,4 +59,7 @@
     <string name="matched_subjects_txt">Matched subjects:</string>
     <string name="instructions_match1">No tutors match your search criteria</string>
     <string name="instructions_match2">Click on a tutor in the list below to see further details</string>
+    <string name="subjects_tutored_txt">Subjects that can be tutored:</string>
+    <string name="chat_txt">Chat</string>
+    <string name="request_a_session_txt">Request a session</string>
 </resources>

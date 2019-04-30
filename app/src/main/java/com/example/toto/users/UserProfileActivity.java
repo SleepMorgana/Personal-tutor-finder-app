@@ -117,7 +117,7 @@ public class UserProfileActivity extends AppCompatActivity{
             profile_pic_view.setImageBitmap(populated_user.getProfile_picture());
         }
 
-        //Update navigation menu with the logged-in user's info
+        //Update the layout with the logged-in user's info
         //Username
         TextView text_view = findViewById(R.id.username_profile_id);
         text_view.setText(populated_user.getUsername());

@@ -56,7 +56,7 @@ public class UserDatabaseHelper extends DatabaseHelper<User> {
         CollectionReference tutorsRef = db.collection(COLLECTION_NAME);
         Query query = tutorsRef.whereEqualTo("Role", Role.TUTOR.toString())
                                .whereEqualTo("Status", Status.ACCEPTED.toString());
-                               //.whereEqualTo("Subjects", new HashMap<>());
+                               //.whereNotEqualTo("Subjects", new HashMap<>()); //Firebase does not provide inequality checks
         query.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {

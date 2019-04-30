@@ -37,7 +37,8 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:listSelector="@android:color/transparent"
-            android:scrollbarStyle="outsideOverlay" />
+            android:scrollbarStyle="outsideOverlay"
+            android:drawSelectorOnTop="true" />
 
         <com.alphabetik.Alphabetik
             android:id="@+id/alphSectionIndex"
