@@ -17,6 +17,7 @@ import android.widget.TextView;
 
 import com.alphabetik.Alphabetik;
 import com.example.toto.R;
+import com.example.toto.utils.Util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,18 +66,6 @@ public class UserProfileActivity extends AppCompatActivity{
 
         //Render the user's subjects (learning needs for subjects vs tutoring subjects for tutors)
         renderSubjects(user);
-    }
-
-    private int getPositionFromData(String character, List<String> orderedData) {
-        int position = 0;
-        for (String s : orderedData) {
-            String letter = "" + s.charAt(0);
-            if (letter.equals("" + character)) {
-                return position;
-            }
-            position++;
-        }
-        return 0;
     }
 
     // create an action bar button
@@ -177,7 +166,7 @@ public class UserProfileActivity extends AppCompatActivity{
                     String info = " Position = " + position + " Char = " + character;
                     Log.i("View: ", view + "," + info);
                     //Toast.makeText(getBaseContext(), info, Toast.LENGTH_SHORT).show();
-                    listView.smoothScrollToPosition(getPositionFromData(character, orderedSubjects.first));
+                    listView.smoothScrollToPosition(Util.getPositionFromData(character, orderedSubjects.first));
                 }
             });
         }

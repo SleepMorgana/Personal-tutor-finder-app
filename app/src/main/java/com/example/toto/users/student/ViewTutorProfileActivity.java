@@ -19,6 +19,7 @@ import com.alphabetik.Alphabetik;
 import com.bumptech.glide.Glide;
 import com.example.toto.R;
 import com.example.toto.users.User;
+import com.example.toto.utils.Util;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
@@ -121,20 +122,8 @@ public class ViewTutorProfileActivity extends AppCompatActivity {
                 String info = " Position = " + position + " Char = " + character;
                 Log.i("View: ", view + "," + info);
                 //Toast.makeText(getBaseContext(), info, Toast.LENGTH_SHORT).show();
-                listView.smoothScrollToPosition(getPositionFromData(character, orderedSubjects.first));
+                listView.smoothScrollToPosition(Util.getPositionFromData(character, orderedSubjects.first));
             }
         });
-    }
-
-    private int getPositionFromData(String character, List<String> orderedData) {
-        int position = 0;
-        for (String s : orderedData) {
-            String letter = "" + s.charAt(0);
-            if (letter.equals("" + character)) {
-                return position;
-            }
-            position++;
-        }
-        return 0;
     }
 }

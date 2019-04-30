@@ -43,11 +43,9 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.TreeMap;
 
 public class UserProfileEditActivity extends AppCompatActivity {
@@ -122,7 +120,7 @@ public class UserProfileEditActivity extends AppCompatActivity {
                      Precondition: Subject names in the database are unique
                       NB: Sorted map because the list of all subjects needs to be sorted for the alphabet scroller to work*/
                 final Pair<Map<String, Subject>, Map<String, Boolean>> pairOfMapSubjects =
-                        populateMappingUserSubject(checked_subjects, all_app_subjects);
+                        Util.populateMappingUserSubject(checked_subjects, all_app_subjects);
 
                 // Alphabetik implementation
                 Alphabetik alphabetik = findViewById(R.id.alphSectionIndex);
@@ -135,7 +133,7 @@ public class UserProfileEditActivity extends AppCompatActivity {
                 listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE); //List allows multiple choices
 
                 //Set alphabet relevant with the subjects' names
-                String[] alphabet = getCustomAlphabet(pairOfMapSubjects.second.keySet());
+                String[] alphabet = Util.getCustomAlphabetSet(pairOfMapSubjects.second.keySet());
                 alphabetik.setAlphabet(alphabet);
 
                 alphabetik.onSectionIndexClickListener(new Alphabetik.SectionIndexClickListener() {
@@ -143,7 +141,7 @@ public class UserProfileEditActivity extends AppCompatActivity {
                     public void onItemClick(View view, int position, String character) {
                         List<String> ordered_data = new ArrayList<>(pairOfMapSubjects.first.keySet());
                         Collections.sort(ordered_data);
-                        listView.smoothScrollToPosition(getPositionFromData(character,ordered_data));
+                        listView.smoothScrollToPosition(Util.getPositionFromData(character,ordered_data));
                     }
                 });
 
@@ -298,70 +296,5 @@ public class UserProfileEditActivity extends AppCompatActivity {
                 subject_list_title.setText(R.string.tutoring_subject_choice_txt);
                 break;
         }
-    }
-
-    private int getPositionFromData(String character, List<String> orderedData) {
-        int position = 0;
-        for (String s : orderedData) {
-            String letter = "" + s.charAt(0);
-            if (letter.equals("" + character)) {
-                return position;
-            }
-            position++;
-        }
-        return 0;
-    }
-
-    /**
-     * Creates an ordered array of  unique letters corresponding to the letters used as first characters
-     * in the items name
-     * @param items Sorted det of subjects' name
-     * @return ordered array of  unique letters corresponding to the letters used as first characters
-     * in the items name
-     */
-    private String[] getCustomAlphabet(Set<String> items) {
-        Set<String> first_letters = new HashSet<>();
-        String[] res;
-
-        for (String item:items) {
-            first_letters.add(item.substring(0, 1).toUpperCase());
-        }
-
-        res = first_letters.toArray(new String[0]);
-        //Arrays.sort(res);
-
-        return(res);
-    }
-
-    /**
-     * Populating two maps in a pair:
-     * - First map (first elt in pair): Mapping subject names with the corresponding subject object.
-     *   Precondition: Subject names in the database are unique
-     * - Second sorted map (second elt in pair): Mapping subject names with a boolean indicating whether the
-     *   subject designated by its names is associated with the current user or not
-     *   Precondition: Subject names in the database are unique
-     *   NB: Sorted map because the list of all subjects needs to be sorted for the alphabet scroller to work
-     * @param user_subjects List of subjects( names associated with a user
-     * @param all_subjects List of all the subjects available in the app
-     * @return The above-mentioned pair
-     */
-    private Pair<Map<String, Subject>, Map<String, Boolean>> populateMappingUserSubject(List<String> user_subjects, List<Subject> all_subjects) {
-        Pair<Map<String, Subject>, Map<String, Boolean>> res;
-        Map<String, Subject> subjectNameMap = new HashMap<>();
-        Map<String, Boolean> subjectChecked = new TreeMap<>();
-
-        //Subject in res are mapped with true (i.e. checked) if it associated with the user
-        for (Subject item:all_subjects) {
-            if (user_subjects.contains(item.getName())) {
-                subjectChecked.put(item.getName(), true);
-            } else {
-                subjectChecked.put(item.getName(), false);
-            }
-            subjectNameMap.put(item.getName(), item);
-        }
-
-        res = new Pair<>(subjectNameMap, subjectChecked);
-
-        return res;
     }
 }

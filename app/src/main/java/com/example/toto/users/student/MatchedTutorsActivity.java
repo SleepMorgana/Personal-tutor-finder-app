@@ -26,14 +26,11 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class MatchedTutorsActivity extends AppCompatActivity {
 
@@ -90,7 +87,7 @@ public class MatchedTutorsActivity extends AppCompatActivity {
 
                 //Set alphabet relevant with the subjects' names
                 Alphabetik alphabetik = findViewById(R.id.alphSectionIndex);
-                String[] alphabet = getCustomAlphabet(tutors_with_matched_subjects);
+                String[] alphabet = Util.getCustomAlphabetList(tutors_with_matched_subjects);
                 alphabetik.setAlphabet(alphabet);
 
                 alphabetik.onSectionIndexClickListener(new Alphabetik.SectionIndexClickListener() {
@@ -98,7 +95,7 @@ public class MatchedTutorsActivity extends AppCompatActivity {
                     public void onItemClick(View view, int position, String character) {
                         Collections.sort(tutors_with_matched_subjects);
                         //Toast.makeText(getBaseContext(), info, Toast.LENGTH_SHORT).show();
-                        listView.smoothScrollToPosition(getPositionFromData(character, tutors_with_matched_subjects));
+                        listView.smoothScrollToPosition(Util.getPositionFromData(character, tutors_with_matched_subjects));
                     }
                 });
 
@@ -165,31 +162,5 @@ public class MatchedTutorsActivity extends AppCompatActivity {
         },failureListener);
 
         return res;
-    }
-
-    private String[] getCustomAlphabet(List<String> items) {
-        Set<String> first_letters = new HashSet<>();
-        String[] res;
-
-        for (String item:items) {
-            first_letters.add(item.substring(0, 1).toUpperCase());
-        }
-
-        res = first_letters.toArray(new String[0]);
-        Arrays.sort(res);
-
-        return res;
-    }
-
-    private int getPositionFromData(String character, List<String> orderedData) {
-        int position = 0;
-        for (String s : orderedData) {
-            String letter = "" + s.charAt(0);
-            if (letter.equals("" + character)) {
-                return position;
-            }
-            position++;
-        }
-        return 0;
     }
 }

@@ -216,13 +216,13 @@ public class AdminMainActivity extends AppCompatActivity implements Observer {
                 listView.setAdapter(adapter);
 
                 //Set alphabet relevant with the subjects' names
-                String[] alphabet = getCustomAlphabet(subjectNameList);
+                String[] alphabet = Util.getCustomAlphabetList(subjectNameList);
                 alphabetik.setAlphabet(alphabet);
 
                 alphabetik.onSectionIndexClickListener(new Alphabetik.SectionIndexClickListener() {
                     @Override
                     public void onItemClick(View view, int position, String character) {
-                        listView.smoothScrollToPosition(getPositionFromData(character, subjectNameList));
+                        listView.smoothScrollToPosition(Util.getPositionFromData(character, subjectNameList));
                     }
                 });
 
@@ -303,32 +303,6 @@ public class AdminMainActivity extends AppCompatActivity implements Observer {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    private String[] getCustomAlphabet(List<String> items) {
-        Set<String> first_letters = new HashSet<>();
-        String[] res;
-
-        for (String item:items) {
-            first_letters.add(item.substring(0, 1).toUpperCase());
-        }
-
-        res = first_letters.toArray(new String[0]);
-        Arrays.sort(res);
-
-        return res;
-    }
-
-    private int getPositionFromData(String character, List<String> orderedData) {
-        int position = 0;
-        for (String s : orderedData) {
-            String letter = "" + s.charAt(0);
-            if (letter.equals("" + character)) {
-                return position;
-            }
-            position++;
-        }
-        return 0;
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
