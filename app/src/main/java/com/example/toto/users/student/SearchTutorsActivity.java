@@ -136,7 +136,7 @@ public class SearchTutorsActivity extends AppCompatActivity {
             public void onClick(View v) {
                 //User search criteria = subjects he/she selected in this activity
                 Intent intent = new Intent(SearchTutorsActivity.this, MatchedTutorsActivity.class);
-                intent.putStringArrayListExtra("subjects_id", (ArrayList<String>) getSubjectsId(checked_subjects, pairOfMapSubjects.first));
+                intent.putStringArrayListExtra("subjects_id", (ArrayList<String>) getSubjectsId(pairOfMapSubjects.first));
                 startActivity(intent);
             }
         });
@@ -219,15 +219,11 @@ public class SearchTutorsActivity extends AppCompatActivity {
         return 0;
     }
 
-    private List<String> getSubjectsId(List<String> subject_names, Map<String, Subject> map_name_subject) {
+    private List<String> getSubjectsId(Map<String, Subject> map_name_subject) {
         List<String> res = new ArrayList<>();
 
         for (Map.Entry<String, Subject> entry:map_name_subject.entrySet()) {
-            for (String subject_name:subject_names) {
-                if (entry.getKey().equals(subject_name)) {
-                    res.add(entry.getValue().getId());
-                }
-            }
+            res.add(entry.getValue().getId());
         }
         return res;
     }
