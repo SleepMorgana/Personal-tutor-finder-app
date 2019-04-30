@@ -61,7 +61,8 @@ public class ChatActivity extends AppCompatActivity {
 
         //add messages already in the queue
         for (RxAbstractMessage message : MessageQueueStore.getInstance().getMessages()){
-            adapter.addToStart(message,true);
+            if (message.getSender().equals(target.getId()))
+                adapter.addToStart(message,true);
         }
 
 //        Util.startQueueService(this);
@@ -72,7 +73,8 @@ public class ChatActivity extends AppCompatActivity {
                 //handle message depending on type
                 //i.e update to s
                 MessageQueueStore.getInstance().add(message);
-                adapter.addToStart(message,true);
+                if (message.getSender().equals(target.getId()))
+                    adapter.addToStart(message,true);
                 Log.d(Util.TAG,"Message Chat: "+message.getText());
                 //Log.d(Util.TAG,"Message Chat1: "+message.getText());
             }
