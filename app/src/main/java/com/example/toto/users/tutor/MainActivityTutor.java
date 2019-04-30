@@ -9,11 +9,13 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.toto.R;
@@ -21,6 +23,14 @@ import com.example.toto.SignInSignUp;
 import com.example.toto.users.User;
 import com.example.toto.users.UserManager;
 import com.example.toto.users.UserProfileActivity;
+import com.example.toto.utils.DateListViewAdapter;
+import com.example.toto.utils.Util;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 //This is going to be used as the home activity of the application for tutors
 public class MainActivityTutor extends AppCompatActivity
@@ -37,6 +47,7 @@ public class MainActivityTutor extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         headerView = navigationView.getHeaderView(0);
         Button sign_out_button = findViewById(R.id.log_out_button_id); //Sign out button
+        TextView info_sessions = (TextView) findViewById(R.id.intro_future_sessions_id);
 
         //Enable the Up button
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -82,6 +93,9 @@ public class MainActivityTutor extends AppCompatActivity
                 finish();
             }
         });
+
+        //Display N upcoming sessions
+        renderNUpcommingSessions(info_sessions);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -148,5 +162,48 @@ public class MainActivityTutor extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    /**
+     * Transform a list of dates on a list of 2-uple(Date in day/month/year, Time in HH:MM:SS)
+     * @param dates_list list of dates
+     * @return Corresponding list of 2-uple(Date in day/month/year, Time in HH:MM:SS)
+     */
+    private List<Pair<String, String>> transformListOfDates(List<Date> dates_list) {
+        List<Pair<String, String>> res = new ArrayList<>();
+        Pair<String, String> temp;
+
+        for (Date d: dates_list) {
+            temp = new Pair<>(new SimpleDateFormat("EEE, d MMM yyyy", Locale.ENGLISH).format(d),
+                    new SimpleDateFormat("HH:mm:ss", Locale.ENGLISH).format(d));
+
+            res.add(temp);
+        }
+
+        return res;
+    }
+
+    /**
+     * Render the N upcoming sessions" dates on screen (if any)
+     * @param info_sessions text info about the N upcoming sessions
+     */
+    private void renderNUpcommingSessions(TextView info_sessions) {
+        ListView listView;
+
+        //Get up to N next future sessions
+        List<Date> upcoming_sessions = user.getNUpcomingSessionDates(Util.NB_UPCOMING_SESSION);
+
+        if (upcoming_sessions.size() == 0) { //the user has no upcoming sessions
+            info_sessions.setText(R.string.no_upcoming_sessions_txt);
+        } else {
+            info_sessions.setText(R.string.upcoming_sessions_txt);
+
+            //Transform List<Date> into List<Pair<String(ie Date), String(ie Time)>> to use DateListViewAdapter
+            List<Pair<String, String>> upcoming_sessions_dates_list = transformListOfDates(upcoming_sessions);
+
+            listView = findViewById(R.id.listView);
+            listView.setAdapter(new DateListViewAdapter(getBaseContext(), upcoming_sessions_dates_list));
+        }
+
     }
 }

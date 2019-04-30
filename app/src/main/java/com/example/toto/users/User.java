@@ -15,6 +15,8 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -285,5 +287,45 @@ public class User extends Observable implements Storable, Parcelable {
         in.readList(sessionIds,String.class.getClassLoader());
         in.readList(sessions, Session.class.getClassLoader());
         //this.status = Status.valueOf(in.readString()); TODO instantiation to avoid null
+    }
+
+    /**
+     * Retrieve the first next nb_sessions upcoming sessions' dates for a user
+     * @param nb_session number of sessions' dates to retrieve
+     * @return the first next nb_sessions upcoming sessions' dates for a user
+     */
+    public List<Date> getNUpcomingSessionDates(int nb_session) {
+        List<Date> dates = new ArrayList<>();
+        List<Date> nDates = new ArrayList<>();
+        List<Date> session_dates;
+        int counter = 0;
+
+        //Transform list of sesions to list of dates occuring in the future (because multiple dates possible for each session)
+        for (Session session:sessions) {
+            session_dates = session.getDates();
+            Date today = GregorianCalendar.getInstance().getTime();
+
+            for (Date date_item:session_dates) {
+                if (date_item.after(today)) {
+                    dates.add(date_item);
+                }
+            }
+        }
+
+        // Order list of sessions' dates(in ascending order)
+        Collections.sort(dates);
+
+        //Retrive first N dates
+        for (Date d:dates) {
+            nDates.add(d);
+
+            counter++;
+
+            if (counter == nb_session-1) {
+                break;
+            }
+        }
+
+        return nDates;
     }
 }

@@ -64,4 +64,7 @@
     <string name="request_a_session_txt">Request a session</string>
     <string name="my_conversations_txt">My conversations</string>
     <string name="requested_sessions_txt">Requested sessions</string>
+    <string name="date_txt">Date</string>
+    <string name="no_upcoming_sessions_txt">You have no upcoming sessions</string>
+    <string name="upcoming_sessions_txt">Dates of your next upcoming sessions (up to five):</string>
 </resources>

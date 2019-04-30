@@ -10,6 +10,7 @@ import android.widget.Toast;
 
 public class Util {
     public static final String TAG = "TUTOR-FINDER";
+    public static final int NB_UPCOMING_SESSION = 5;
 
     public static void printToast(Context context, String msg, int duration){
         Toast.makeText(context, msg,
