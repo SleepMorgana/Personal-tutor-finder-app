@@ -28,6 +28,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -103,8 +104,9 @@ public class SearchTutorsActivity extends AppCompatActivity {
                 alphabetik.onSectionIndexClickListener(new Alphabetik.SectionIndexClickListener() {
                     @Override
                     public void onItemClick(View view, int position, String character) {
-                        listView.smoothScrollToPosition(getPositionFromData(character,
-                                new ArrayList<>(pairOfMapSubjects.first.keySet())));
+                        List<String> ordered_data = new ArrayList<>(pairOfMapSubjects.first.keySet());
+                        Collections.sort(ordered_data);
+                        listView.smoothScrollToPosition(getPositionFromData(character, ordered_data));
                     }
                 });
             }

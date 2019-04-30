@@ -97,8 +97,7 @@ public class MatchedTutorsActivity extends AppCompatActivity {
                 alphabetik.onSectionIndexClickListener(new Alphabetik.SectionIndexClickListener() {
                     @Override
                     public void onItemClick(View view, int position, String character) {
-                        String info = " Position = " + position + " Char = " + character;
-                        Log.i("View: ", view + "," + info);
+                        Collections.sort(tutors_with_matched_subjects);
                         //Toast.makeText(getBaseContext(), info, Toast.LENGTH_SHORT).show();
                         listView.smoothScrollToPosition(getPositionFromData(character, tutors_with_matched_subjects));
                     }
