@@ -1,5 +1,7 @@
 package com.example.toto.users.student;
 
+import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
@@ -11,6 +13,7 @@ import android.util.Pair;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -18,6 +21,8 @@ import android.widget.TextView;
 import com.alphabetik.Alphabetik;
 import com.bumptech.glide.Glide;
 import com.example.toto.R;
+import com.example.toto.RequestSessionActivity;
+import com.example.toto.chat.ChatActivity;
 import com.example.toto.users.User;
 import com.example.toto.utils.Util;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -29,6 +34,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class ViewTutorProfileActivity extends AppCompatActivity {
+    private Context mContext=this;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,13 +51,37 @@ public class ViewTutorProfileActivity extends AppCompatActivity {
         }
 
         //Retrieve data sent from previous activity (i.e. tutor user selected in previous activity in this case)
-        User selected_tutor = Objects.requireNonNull(getIntent().getExtras()).getParcelable("selected_tutor");
+        final User selected_tutor = Objects.requireNonNull(getIntent().getExtras()).getParcelable("selected_tutor");
 
         //Retrieve and display the tutor's profile picture (if any) + display his username
         updateUserIdentity(Objects.requireNonNull(selected_tutor));
 
         //Render the tutor's subjects
         renderSubjects(selected_tutor);
+
+        //start chat button
+        Button chatButton = findViewById(R.id.chat_button_id);
+        chatButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //start chat activity
+                Intent intent = new Intent(mContext, ChatActivity.class);
+                intent.putExtra(ChatActivity.chatTarget,selected_tutor);
+                startActivity(intent);
+            }
+        });
+
+        //request session button, goes to session activity
+        Button sessionButton = findViewById(R.id.session_request_button_id);
+        sessionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //start chat activity
+                Intent intent = new Intent(mContext, RequestSessionActivity.class);
+                intent.putExtra(RequestSessionActivity.mTutorFlag,selected_tutor);
+                startActivity(intent);
+            }
+        });
     }
 
     @Override

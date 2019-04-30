@@ -47,7 +47,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/send" />
+            android:text="@string/send"
+            android:background="@drawable/round_button"
+            android:drawableStart="@android:drawable/sym_action_chat"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            android:textColor="@android:color/white"
+            tools:ignore="ButtonStyle" />
+
     </LinearLayout>
 
 </LinearLayout>

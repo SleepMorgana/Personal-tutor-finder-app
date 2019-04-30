@@ -9,6 +9,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -166,6 +167,18 @@ public class ViewRequestSessionActivity extends AppCompatActivity {
         if (!session.getStatus().equals(Status.PENDING)){
             accept.setVisibility(View.GONE);
             decline.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                finish(); // close this activity and return to preview activity (if there is any)
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 

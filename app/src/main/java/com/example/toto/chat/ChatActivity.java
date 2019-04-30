@@ -10,6 +10,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -19,6 +20,7 @@ import com.example.toto.R;
 import com.example.toto.queue.channelRcv.OnQueueMessageArrive;
 import com.example.toto.queue.channelRcv.QueueService;
 import com.example.toto.queue.channelTransmission.RabbitQueueHelper;
+import com.example.toto.queue.messages.MessageQueueStore;
 import com.example.toto.queue.messages.RxAbstractMessage;
 import com.example.toto.users.User;
 import com.example.toto.users.UserManager;
@@ -27,6 +29,9 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.stfalcon.chatkit.messages.MessagesList;
 import com.stfalcon.chatkit.messages.MessagesListAdapter;
+
+import java.util.Observable;
+import java.util.Observer;
 
 public class ChatActivity extends AppCompatActivity {
     public final static String chatTarget = "targetUser";
@@ -54,16 +59,22 @@ public class ChatActivity extends AppCompatActivity {
                 new MessagesListAdapter<>(UserManager.getUserInstance().getUser().getId(), null);
         messagesList.setAdapter(adapter);
 
-        Util.startQueueService(this);
+        //add messages already in the queue
+        for (RxAbstractMessage message : MessageQueueStore.getInstance().getMessages()){
+            adapter.addToStart(message,true);
+        }
 
-        RabbitQueueHelper.setChannelIsReady(true);
+//        Util.startQueueService(this);
+//        RabbitQueueHelper.setChannelIsReady(true);
         QueueService.addQueueMessageHandler(new OnQueueMessageArrive() {
             @Override
             public void messageReady(RxAbstractMessage message) {
                 //handle message depending on type
                 //i.e update to s
+                MessageQueueStore.getInstance().add(message);
                 adapter.addToStart(message,true);
-                Log.d(Util.TAG,"Message: "+message.getText());
+                Log.d(Util.TAG,"Message Chat: "+message.getText());
+                //Log.d(Util.TAG,"Message Chat1: "+message.getText());
             }
         });
 
@@ -91,8 +102,7 @@ public class ChatActivity extends AppCompatActivity {
                 }, new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Util.printToast(getApplicationContext(),
-                                "There were issues sending the message, please try again.", Toast.LENGTH_SHORT);
+                        mHandler.sendEmptyMessage(2);
                     }
                 });
             }
@@ -107,8 +117,24 @@ public class ChatActivity extends AppCompatActivity {
                     adapter.addToStart((RxAbstractMessage) msg.obj,true);
                     input.setText("");
                 }
+                if(msg.what == 2){
+                    Util.printToast(getApplicationContext(),
+                            "There were issues sending the message, please try again.", Toast.LENGTH_SHORT);
+                }
             }
         };
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                finish(); // close this activity and return to preview activity (if there is any)
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override

@@ -111,4 +111,13 @@ public class RxAbstractMessage implements IMessage {
         calendar.setTimeInMillis(Long.parseLong(timestamp));
         return calendar.getTime();
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof RxAbstractMessage){
+            if (((RxAbstractMessage)obj).getId().equals(this.id))
+                return true;
+        }
+        return false;
+    }
 }
