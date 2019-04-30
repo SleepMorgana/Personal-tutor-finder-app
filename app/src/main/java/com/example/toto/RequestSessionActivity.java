@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -37,10 +38,11 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class RequestSessionActivity extends AppCompatActivity {
     private User tutor;
-    private Context mContext;
+    private Context mContext=this;
     public static final String mTutorFlag = "selectedItem";
 
     @Override
@@ -56,10 +58,8 @@ public class RequestSessionActivity extends AppCompatActivity {
             ab.setDisplayShowHomeEnabled(true);
         }
 
-        mContext =this;
-
         //Selected tutor user, probably through intent element
-        Intent intent = getIntent();//TODO flag name must be changed
+        Intent intent = getIntent();
         tutor = intent.getParcelableExtra(mTutorFlag);
 
         //Render the user's identity
@@ -193,6 +193,7 @@ public class RequestSessionActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Util.printToast(mContext,"A new session was scheduled!", Toast.LENGTH_SHORT);
+                        finish();
                     }
                 }, new OnFailureListener() {
                     @Override
@@ -205,6 +206,17 @@ public class RequestSessionActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                finish(); // close this activity and return to preview activity (if there is any)
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
     /**
      * Render the current user's identity (i.e. username, email address, profile picture)
      * @param populated_user current logged-in user

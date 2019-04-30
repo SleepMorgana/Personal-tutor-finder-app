@@ -67,4 +67,5 @@
     <string name="date_txt">Date</string>
     <string name="no_upcoming_sessions_txt">You have no upcoming sessions</string>
     <string name="upcoming_sessions_txt">Dates of your next upcoming sessions (up to five):</string>
+    <string name="send">Send</string>
 </resources>

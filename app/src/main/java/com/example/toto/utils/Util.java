@@ -1,5 +1,7 @@
 package com.example.toto.utils;
 
+import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -26,6 +28,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import android.content.Intent;
+import android.widget.Toast;
+
+import com.example.toto.queue.channelRcv.QueueService;
 
 public class Util {
     public static final String TAG = "TUTOR-FINDER";
@@ -60,7 +66,7 @@ public class Util {
     }
 
     public static Dialog makeInputDialog(String title, String msg, String positiveLabal, String negativeLabel, Context ctx,
-                                    EditText text, DialogInterface.OnClickListener positive, DialogInterface.OnClickListener negative){
+                                    EditText text, DialogInterface.OnClickListener positive, DialogInterface.OnClickListener negative) {
         AlertDialog mDialog = new AlertDialog.Builder(ctx)
                 .setTitle(title)
                 .setMessage(msg)
@@ -181,7 +187,7 @@ public class Util {
         Map<String, Boolean> subjectChecked = new TreeMap<>();
 
         //Subject in res are mapped with true (i.e. checked) if it associated with the user
-        for (Subject item:all_subjects) {
+        for (Subject item : all_subjects) {
             if (user_subjects.contains(item.getName())) {
                 subjectChecked.put(item.getName(), true);
             } else {
@@ -193,5 +199,31 @@ public class Util {
         res = new Pair<>(subjectNameMap, subjectChecked);
 
         return res;
+    }
+
+    public static boolean isMyServiceRunning(Activity ctx, Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) ctx.getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static void startQueueService(Activity ctx){
+        if (Util.isMyServiceRunning(ctx, QueueService.class))
+            return;
+        //start queue service
+        Intent tmpIntent = new Intent(ctx, QueueService.class);
+        ctx.startService(tmpIntent);
+    }
+
+    public static void stopQueueService(Activity ctx){
+        if (!Util.isMyServiceRunning(ctx,QueueService.class))
+            return;
+        //stop queue service
+        Intent tmpIntent = new Intent(ctx, QueueService.class);
+        ctx.stopService(tmpIntent);
     }
 }

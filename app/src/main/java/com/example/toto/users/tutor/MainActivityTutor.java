@@ -9,6 +9,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,6 +20,11 @@ import android.widget.TextView;
 
 import com.example.toto.R;
 import com.example.toto.SignInSignUp;
+import com.example.toto.queue.channelRcv.OnQueueMessageArrive;
+import com.example.toto.queue.channelRcv.QueueService;
+import com.example.toto.queue.channelTransmission.RabbitQueueHelper;
+import com.example.toto.queue.messages.MessageQueueStore;
+import com.example.toto.queue.messages.RxAbstractMessage;
 import com.example.toto.users.User;
 import com.example.toto.users.UserManager;
 import com.example.toto.users.UserProfileActivity;
@@ -97,6 +103,17 @@ public class MainActivityTutor extends AppCompatActivity
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
+
+        Util.startQueueService(this);
+        RabbitQueueHelper.setChannelIsReady(true);
+        QueueService.addQueueMessageHandler(new OnQueueMessageArrive() {
+            @Override
+            public void messageReady(RxAbstractMessage message) {
+                MessageQueueStore.getInstance().add(message);
+                Log.d(Util.TAG,"Message Main: "+message.getText());
+            }
+        });
+
     }
 
     @Override
@@ -160,5 +177,11 @@ public class MainActivityTutor extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Util.stopQueueService(this);
     }
 }

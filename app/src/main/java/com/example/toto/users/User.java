@@ -11,6 +11,7 @@ import com.example.toto.sessions.Status;
 import com.example.toto.subjects.Subject;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.stfalcon.chatkit.commons.models.IUser;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,7 +25,7 @@ import java.util.Observable;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-public class User extends Observable implements Storable, Parcelable {
+public class User extends Observable implements Storable, Parcelable, IUser {
     //combination of FirebaseUser and user from the `users` collection in firestore
     private String username;
     private String email;
@@ -120,6 +121,16 @@ public class User extends Observable implements Storable, Parcelable {
 
     public String getId() {
         return id;
+    }
+
+    @Override
+    public String getName() {
+        return username;
+    }
+
+    @Override
+    public String getAvatar() {
+        return null;
     }
 
     public Bitmap getProfile_picture() {
