@@ -29,15 +29,14 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 public class SearchTutorsActivity extends AppCompatActivity {
 
     private List<String> checked_subjects;
     private Pair<Map<String, Subject>, Map<String, Boolean>> pairOfMapSubjects;
+    private CheckboxArrayAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,10 +84,11 @@ public class SearchTutorsActivity extends AppCompatActivity {
                       NB: Sorted map because the list of all subjects needs to be sorted for the alphabet scroller to work*/
                 pairOfMapSubjects = Util.populateMappingUserSubject(checked_subjects, all_app_subjects);
 
+
                 // Alphabetik implementation
                 Alphabetik alphabetik = findViewById(R.id.alphSectionIndex);
                 final ListView listView=(ListView)findViewById(R.id.listView);
-                final CheckboxArrayAdapter adapter = new CheckboxArrayAdapter(SearchTutorsActivity.this,
+                adapter = new CheckboxArrayAdapter(SearchTutorsActivity.this,
                         pairOfMapSubjects.second.keySet().toArray(new String[0]),
                         pairOfMapSubjects.second);
                 listView.setAdapter(adapter);
@@ -136,7 +136,8 @@ public class SearchTutorsActivity extends AppCompatActivity {
             public void onClick(View v) {
                 //User search criteria = subjects he/she selected in this activity
                 Intent intent = new Intent(SearchTutorsActivity.this, MatchedTutorsActivity.class);
-                intent.putStringArrayListExtra("subjects_id", (ArrayList<String>) getSubjectsId(pairOfMapSubjects.first));
+                intent.putStringArrayListExtra("subjects_id", (ArrayList<String>)
+                        getSubjectsId(pairOfMapSubjects.first, adapter.getSubject_map()));
                 startActivity(intent);
             }
         });
@@ -154,11 +155,29 @@ public class SearchTutorsActivity extends AppCompatActivity {
         }
     }
 
-    private List<String> getSubjectsId(Map<String, Subject> map_name_subject) {
+    /**
+     * Retrieve subjects' id from a mapping between subjects' name and whether these are checked by the user or not
+     * @param map_name_subject mapping between subjects' name and Subject object
+     * @param subject_map above-mentioned mapping
+     * @return List of subjects' id checked by the user
+     */
+    private List<String> getSubjectsId(Map<String, Subject> map_name_subject, Map<String, Boolean> subject_map) {
         List<String> res = new ArrayList<>();
+        List<String> selected_subject_names = new ArrayList<>();
 
-        for (Map.Entry<String, Subject> entry:map_name_subject.entrySet()) {
-            res.add(entry.getValue().getId());
+        for (Map.Entry<String, Boolean> entry : subject_map.entrySet()) {
+            if (entry.getValue()) {
+                selected_subject_names.add(entry.getKey());
+            }
+        }
+
+        for (String subject_name:selected_subject_names) {
+            for (Map.Entry<String, Subject> entry : map_name_subject.entrySet()) {
+                if (entry.getKey().equals(subject_name)) {
+                    res.add(entry.getValue().getId());
+                    break;
+                }
+            }
         }
         return res;
     }
