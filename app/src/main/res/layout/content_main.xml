@@ -11,6 +11,13 @@
     tools:showIn="@layout/app_bar_main">
 
     <TextView
+        android:id="@+id/messages_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="" />
+
+    <TextView
         android:id="@+id/intro_future_sessions_id"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -102,11 +102,17 @@ public class MainActivityStudent extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
+        final int[] newMessages = {0};
+        final TextView messages = findViewById(R.id.messages_textview);
+        messages.setVisibility(View.GONE);
         Util.startQueueService(this);
         RabbitQueueHelper.setChannelIsReady(true);
         QueueService.addQueueMessageHandler(new OnQueueMessageArrive() {
             @Override
             public void messageReady(RxAbstractMessage message) {
+                newMessages[0] += 1;
+                messages.setText("New messages: "+newMessages[0]);
+                messages.setVisibility(View.VISIBLE);
                 MessageQueueStore.getInstance().add(message);
                 Log.d(Util.TAG,"Message Main: "+message.getText());
             }

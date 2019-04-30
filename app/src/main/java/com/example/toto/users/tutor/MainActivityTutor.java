@@ -43,7 +43,7 @@ public class MainActivityTutor extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_tutor);
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        final NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         headerView = navigationView.getHeaderView(0);
         Button sign_out_button = findViewById(R.id.log_out_button_id); //Sign out button
@@ -104,11 +104,15 @@ public class MainActivityTutor extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
+        final int[] newMessages = {0};
+        final TextView messages = findViewById(R.id.messages_textview);
         Util.startQueueService(this);
         RabbitQueueHelper.setChannelIsReady(true);
         QueueService.addQueueMessageHandler(new OnQueueMessageArrive() {
             @Override
             public void messageReady(RxAbstractMessage message) {
+                newMessages[0] += 1;
+                messages.setText("New messages: "+newMessages[0]);
                 MessageQueueStore.getInstance().add(message);
                 Log.d(Util.TAG,"Message Main: "+message.getText());
             }
