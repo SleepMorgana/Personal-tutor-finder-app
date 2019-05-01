@@ -339,4 +339,14 @@ public class User extends Observable implements Storable, Parcelable, IUser {
 
         return nDates;
     }
+
+    //Returns list of accepted sessions
+    public List<Session> getAcceptedSessions(){
+        List<Session> acceptedSessions = new ArrayList<>();
+        for (Session session : sessions){
+            if (session.getStatus().equals(Status.ACCEPTED))
+                acceptedSessions.add(session);
+        }
+        return acceptedSessions;
+    }
 }

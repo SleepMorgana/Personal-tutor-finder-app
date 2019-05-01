@@ -9,7 +9,7 @@
         android:title="@string/requested_sessions_txt" />
 
     <item
-        android:id="@+id/nav_gallery"
+        android:id="@+id/nav_conversations"
         android:icon="@android:drawable/sym_action_chat"
         android:title="@string/my_conversations_txt" />
 

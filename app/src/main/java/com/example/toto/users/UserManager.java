@@ -29,6 +29,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Observer;
 import java.util.concurrent.CompletableFuture;
@@ -299,6 +300,7 @@ public class UserManager {
             failure.onFailure(new UnsupportedOperationException("Invalid session entity"));
             return;
         }
+        currentUser.getUser().getSessions().get(currentUser.getUser().getSessions().indexOf(session)).updateStatus(Status.ACCEPTED);
         session.updateStatus(Status.ACCEPTED);
         SessionManager.updateSession(session,success,failure);
     }
@@ -309,6 +311,7 @@ public class UserManager {
             failure.onFailure(new UnsupportedOperationException("Invalid session entity"));
             return;
         }
+        currentUser.getUser().getSessions().get(currentUser.getUser().getSessions().indexOf(session)).updateStatus(Status.DECLINED);
         session.updateStatus(Status.DECLINED);
         SessionManager.updateSession(session,success,failure);
     }
@@ -369,6 +372,60 @@ public class UserManager {
     public static void removeSubject(Subject subject, OnSuccessListener success, OnFailureListener error){
         currentUser.getUser().removeSubject(subject);
         getDbInstance().upsert(currentUser.getUser(),success,error);
+    }
+
+    //Refresh user's subjects elements
+    public static void refreshSubjects(@NonNull final OnSuccessListener success, @NonNull final OnFailureListener error){
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                final ArrayList<String> deleteSubjects = new ArrayList<>();
+                for(final Map.Entry<String, Subject> entry : currentUser.getUser().getSubjects().entrySet()){
+                    SessionManager.retrieveSessionById((String) entry.getKey(), new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if (task.isSuccessful()) {
+                                //subject exists but could have been edited
+                                Subject subject = currentUser.getUser().getSubjects().get(entry.getKey());
+                                Subject tmp = new Subject(task.getResult());
+                                if (!tmp.equals(subject)){
+                                    currentUser.getUser().removeSubject(subject);
+                                    currentUser.getUser().addSubject(tmp);
+                                    getDbInstance().upsert(currentUser.getUser(), new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                        }
+                                    }, new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                        }
+                                    });
+                                }
+                            }else {
+                                //subject was deleted, delete subject from user
+                                deleteSubjects.add(entry.getKey());
+                            }
+                        }
+                    });
+                }
+
+                //delete subjects
+                for (String id : deleteSubjects) {
+                    Subject subject = currentUser.getUser().getSubjects().get(id);
+                    removeSubject(subject, new OnSuccessListener() {
+                        @Override
+                        public void onSuccess(Object o) {
+                        }
+                    }, new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                        }
+                    });
+                }
+
+                success.onSuccess(currentUser.getUser());
+            }
+        });
     }
 
     //fetches user from db

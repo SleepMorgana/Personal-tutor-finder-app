@@ -45,14 +45,15 @@ public class ChatActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ActionBar ab = getSupportActionBar(); // Get a support ActionBar corresponding to this toolbar
-        if (ab != null) {
-            ab.setDisplayHomeAsUpEnabled(true);
-            ab.setDisplayShowHomeEnabled(true);
-        }
 
         Intent userIntent = getIntent();
         final User target = userIntent.getParcelableExtra(chatTarget);
 
+        if (ab != null) {
+            ab.setDisplayHomeAsUpEnabled(true);
+            ab.setDisplayShowHomeEnabled(true);
+            ab.setTitle(target.getUsername());
+        }
 
         final MessagesList messagesList = (MessagesList) findViewById(R.id.messagesList);
         final MessagesListAdapter<RxAbstractMessage> adapter =

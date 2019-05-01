@@ -162,6 +162,24 @@
             </intent-filter>
         </activity>
         <service android:name=".queue.channelRcv.QueueService"/>
+        <activity
+            android:name=".users.tutor.TutorSessionActivity"
+            android:label="Requests"
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".users.tutor.ConversationListActivity"
+            android:label="My contacts"
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

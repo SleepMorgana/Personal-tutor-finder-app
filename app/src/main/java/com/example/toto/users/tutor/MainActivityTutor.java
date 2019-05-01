@@ -3,6 +3,7 @@ package com.example.toto.users.tutor;
 import android.content.Intent;
 import android.os.Bundle;
 
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -29,6 +30,8 @@ import com.example.toto.users.User;
 import com.example.toto.users.UserManager;
 import com.example.toto.users.UserProfileActivity;
 import com.example.toto.utils.Util;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 //This is going to be used as the home activity of the application for tutors
 public class MainActivityTutor extends AppCompatActivity
@@ -106,13 +109,29 @@ public class MainActivityTutor extends AppCompatActivity
 
         final int[] newMessages = {0};
         final TextView messages = findViewById(R.id.messages_textview);
+        messages.setVisibility(View.GONE);
         Util.startQueueService(this);
         RabbitQueueHelper.setChannelIsReady(true);
         QueueService.addQueueMessageHandler(new OnQueueMessageArrive() {
             @Override
             public void messageReady(RxAbstractMessage message) {
+                messages.setVisibility(View.VISIBLE);
                 newMessages[0] += 1;
-                messages.setText("New messages: "+newMessages[0]);
+                UserManager.retrieveUserById(message.getSender(), new OnSuccessListener<User>() {
+                    @Override
+                    public void onSuccess(User user) {
+                        messages.setText("New message from "+user.getUsername());
+                    }
+                }, new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                    }
+                });
+
+                if (newMessages[0]>1)
+                    messages.setText("New messages: "+newMessages[0]);
+
                 MessageQueueStore.getInstance().add(message);
                 Log.d(Util.TAG,"Message Main: "+message.getText());
             }
@@ -164,18 +183,13 @@ public class MainActivityTutor extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
+        if (id == R.id.nav_requests) {
+           //goto TutorSessionActivity
+            Intent intent = new Intent(this,TutorSessionActivity.class);
+            startActivity(intent);
+        } else if (id == R.id.nav_conversations) {
+            Intent intent = new Intent(this,ConversationListActivity.class);
+            startActivity(intent);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

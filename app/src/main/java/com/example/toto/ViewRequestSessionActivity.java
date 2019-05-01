@@ -118,6 +118,7 @@ public class ViewRequestSessionActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(Object o) {
                         Util.printToast(mContext,"Request accepted",Toast.LENGTH_LONG);
+                        finish();
                     }
                 }, new OnFailureListener() {
                     @Override
@@ -143,6 +144,7 @@ public class ViewRequestSessionActivity extends AppCompatActivity {
                                     @Override
                                     public void onSuccess(Object o) {
                                         Util.printToast(mContext,"The session was declined",Toast.LENGTH_LONG);
+                                        finish();
                                     }
                                 }, new OnFailureListener() {
                                     @Override
