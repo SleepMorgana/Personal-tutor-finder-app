@@ -62,7 +62,18 @@ public class UserManager {
                         refreshSessions(new OnSuccessListener() {
                             @Override
                             public void onSuccess(Object o) {
-                                listener.onSuccess(currentUser);
+                                refreshSubjects(new OnSuccessListener() {
+                                    @Override
+                                    public void onSuccess(Object o) {
+                                        listener.onSuccess(currentUser);
+                                    }
+                                }, new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        //subjects weren't updated but still goto next activity
+                                        listener.onSuccess(currentUser);
+                                    }
+                                });
                             }
                         }, new OnFailureListener() {
                             @Override
@@ -381,7 +392,7 @@ public class UserManager {
             public void run() {
                 final ArrayList<String> deleteSubjects = new ArrayList<>();
                 for(final Map.Entry<String, Subject> entry : currentUser.getUser().getSubjects().entrySet()){
-                    SessionManager.retrieveSessionById((String) entry.getKey(), new OnCompleteListener<DocumentSnapshot>() {
+                    SubjectManager.retrieveSubjectById((String) entry.getKey(), new OnCompleteListener<DocumentSnapshot>() {
                         @Override
                         public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                             if (task.isSuccessful()) {
