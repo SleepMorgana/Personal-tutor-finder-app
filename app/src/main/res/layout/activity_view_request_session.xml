@@ -23,8 +23,7 @@
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/gradient"
-        android:layout_weight="1">
+        android:background="@drawable/gradient">
 
         <!-- Third-party libraryto render circular image view easily and rapidly
              Dodenhof, H, A circular ImageView for Android, GitHub repository, https://github.com/hdodenhof/CircleImageView -->
@@ -42,25 +41,15 @@
             android:id="@+id/username_profile_id"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:textAlignment="center"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-            android:textColor="@android:color/white"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/profile_picture_view_id" />
-
-        <TextView
-            android:id="@+id/email_profile_id"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="16dp"
             android:textAlignment="center"
-            android:textColor="@android:color/background_light"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textColor="@android:color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/username_profile_id" />
+            app:layout_constraintTop_toBottomOf="@+id/profile_picture_view_id" />
 
     </android.support.constraint.ConstraintLayout>
 

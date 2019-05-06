@@ -54,7 +54,7 @@ public class ViewTutorProfileActivity extends AppCompatActivity {
         final User selected_tutor = Objects.requireNonNull(getIntent().getExtras()).getParcelable("selected_tutor");
 
         //Retrieve and display the tutor's profile picture (if any) + display his username
-        updateUserIdentity(Objects.requireNonNull(selected_tutor));
+        updateUserIdentity(selected_tutor);
 
         //Render the tutor's subjects
         renderSubjects(selected_tutor);
@@ -100,7 +100,7 @@ public class ViewTutorProfileActivity extends AppCompatActivity {
      * Render the tutor's identity (i.e. username, profile picture)
      * NB: The user's email is not displayed here for privacy purposes. A student can communicate with a
      * tutor using the messaging system
-     * @param tutor_user tutor user
+     * @param tutor_user
      */
     private void updateUserIdentity(User tutor_user) {
         /*By default the profile picture is a gender-neutral avatar, unless he/she has uploaded his/her
@@ -120,7 +120,7 @@ public class ViewTutorProfileActivity extends AppCompatActivity {
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception exception) {
-                Log.d("CECILE", "Nor found");
+                Log.d(Util.TAG, "Not found");
             }
         });
 

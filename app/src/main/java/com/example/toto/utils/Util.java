@@ -7,6 +7,9 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.support.annotation.NonNull;
 import android.util.Pair;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -26,12 +29,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import android.content.Intent;
 import android.widget.Toast;
 
 import com.example.toto.queue.channelRcv.QueueService;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.storage.FirebaseStorage;
 
 public class Util {
     public static final String TAG = "TUTOR-FINDER";
@@ -226,4 +234,27 @@ public class Util {
         Intent tmpIntent = new Intent(ctx, QueueService.class);
         ctx.stopService(tmpIntent);
     }
+
+    /**
+     *
+     * @param pic_path
+     * @return
+     */
+    public static Bitmap downloadProfilePic(String pic_path) {
+        Bitmap res = null;
+        FirebaseStorage.getInstance().getReference().child(pic_path).getBytes(Long.MAX_VALUE)
+                .addOnCompleteListener(new OnCompleteListener<byte[]>() {
+                    @Override
+                    public void onComplete(@NonNull Task<byte[]> task) {
+                        if (task.isSuccessful()) {
+                            byte[] picture = task.getResult();
+                            //Picture converted in Bitmap
+                            Bitmap res = BitmapFactory.decodeByteArray(picture, 0, picture.length);
+                        }
+                    }
+                });
+
+        return res;
+    }
+
 }

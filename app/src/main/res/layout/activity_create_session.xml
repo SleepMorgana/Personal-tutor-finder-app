@@ -20,61 +20,38 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <android.support.constraint.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/gradient"
-        android:layout_weight="1">
-
-        <!-- Third-party libraryto render circular image view easily and rapidly
-             Dodenhof, H, A circular ImageView for Android, GitHub repository, https://github.com/hdodenhof/CircleImageView -->
-        <de.hdodenhof.circleimageview.CircleImageView xmlns:app="http://schemas.android.com/apk/res-auto"
-            android:id="@+id/profile_picture_view_id"
-            android:layout_width="79dp"
-            android:layout_height="96dp"
-            android:paddingTop="24dp"
-            android:src="@drawable/ic_user_avatar"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/username_profile_id"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:textAlignment="center"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-            android:textColor="@android:color/white"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/profile_picture_view_id" />
-
-        <TextView
-            android:id="@+id/email_profile_id"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="16dp"
-            android:textAlignment="center"
-            android:textColor="@android:color/background_light"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/username_profile_id" />
-
-    </android.support.constraint.ConstraintLayout>
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="60"
         android:orientation="vertical">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/selected_tutor_intro_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="@string/selected_tutor_txt"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/username_profile_id"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="" />
+        </LinearLayout>
+
         <TextView
             android:id="@+id/textView3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/create_session_subject"/>
+            android:text="@string/create_session_subject" />
 
         <Spinner
             android:id="@+id/subject_spinner"
@@ -85,7 +62,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:orientation="vertical"
             android:layout_weight="80">
 
