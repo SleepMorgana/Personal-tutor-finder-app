@@ -313,12 +313,15 @@ public class User extends Observable implements Storable, Parcelable, IUser {
 
         //Transform list of sesions to list of dates occuring in the future (because multiple dates possible for each session)
         for (Session session:sessions) {
-            session_dates = session.getDates();
-            Date today = GregorianCalendar.getInstance().getTime();
 
-            for (Date date_item:session_dates) {
-                if (date_item.after(today)) {
-                    dates.add(date_item);
+            if (session.getStatus().equals(Status.ACCEPTED)) {
+                session_dates = session.getDates();
+                Date today = GregorianCalendar.getInstance().getTime();
+
+                for (Date date_item : session_dates) {
+                    if (date_item.after(today)) {
+                        dates.add(date_item);
+                    }
                 }
             }
         }
