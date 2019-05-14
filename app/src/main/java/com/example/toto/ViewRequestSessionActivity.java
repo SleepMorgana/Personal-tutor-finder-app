@@ -201,7 +201,7 @@ public class ViewRequestSessionActivity extends AppCompatActivity {
         TextView text_view = findViewById(R.id.username_profile_id);
         text_view.setText(populated_user.getUsername());
         //Email
-        text_view = findViewById(R.id.email_profile_id);
-        text_view.setText(populated_user.getEmail());
+//        text_view = findViewById(R.id.email_profile_id);
+//        text_view.setText(populated_user.getEmail());
     }
 }
