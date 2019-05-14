@@ -26,7 +26,6 @@ import android.widget.RadioButton;
 import android.widget.Toast;
 
 import com.example.toto.admin.AdminMainActivity;
-import com.example.toto.queue.channelRcv.QueueService;
 import com.example.toto.users.Role;
 import com.example.toto.users.User;
 import com.example.toto.users.UserManager;

@@ -14,7 +14,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -38,7 +37,6 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class RequestSessionActivity extends AppCompatActivity {
     private User tutor;
@@ -62,8 +60,9 @@ public class RequestSessionActivity extends AppCompatActivity {
         Intent intent = getIntent();
         tutor = intent.getParcelableExtra(mTutorFlag);
 
-        //Render the user's identity
-        updateUserIdentity(tutor);
+        //Render the tutor's identity (i.e. username in this activity)
+        TextView text_view = findViewById(R.id.username_profile_id);
+        text_view.setText(tutor.getUsername());
 
 
 
@@ -216,25 +215,5 @@ public class RequestSessionActivity extends AppCompatActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
-    /**
-     * Render the current user's identity (i.e. username, email address, profile picture)
-     * @param populated_user current logged-in user
-     */
-    private void updateUserIdentity(User populated_user) {
-        /*By default the profile picture is a gender-neutral avatar, unless he/she has uploaded his/her
-        own profile picture which must then be displayed instead of the default avatar */
-        if (populated_user.getProfile_picture() != null) {
-            ImageView profile_pic_view = (ImageView) findViewById(R.id.profile_picture_view_id);
-            profile_pic_view.setImageBitmap(populated_user.getProfile_picture());
-        }
-
-        //Update navigation menu with the logged-in user's info
-        //Username
-        TextView text_view = findViewById(R.id.username_profile_id);
-        text_view.setText(populated_user.getUsername());
-        //Email
-        text_view = findViewById(R.id.email_profile_id);
-        text_view.setText(populated_user.getEmail());
     }
 }
