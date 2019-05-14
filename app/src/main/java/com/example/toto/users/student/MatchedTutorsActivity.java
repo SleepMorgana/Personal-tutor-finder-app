@@ -69,10 +69,11 @@ public class MatchedTutorsActivity extends AppCompatActivity {
                 }
 
                 for (Map.Entry<User, List<String>> entry : matched_tutors.entrySet()) {
-                    tutors_with_matched_subjects.add(entry.getKey().getUsername());
-
                     temp_pair = new Pair<>(entry.getKey(), entry.getValue().toString().substring(1,entry.getValue().toString().length()-1));
-                    user_info_list.add(temp_pair);
+                    if(!user_info_list.contains(temp_pair)) {
+                        user_info_list.add(temp_pair);
+                        tutors_with_matched_subjects.add(entry.getKey().getUsername());
+                    }
                 }
 
                 final ListView listView = findViewById(R.id.listView);
@@ -155,7 +156,9 @@ public class MatchedTutorsActivity extends AppCompatActivity {
                         }
                     }
 
-                    res.put(user, matched_subjects);
+                    if (!res.containsKey(user)){
+                        res.put(user, matched_subjects);
+                    }
                 }
                 successListener.onSuccess(res);
             }

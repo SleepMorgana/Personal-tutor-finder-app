@@ -352,4 +352,11 @@ public class User extends Observable implements Storable, Parcelable, IUser {
         }
         return acceptedSessions;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof User)
+            return ((User) o).id.equals(this.id);
+        return false;
+    }
 }
