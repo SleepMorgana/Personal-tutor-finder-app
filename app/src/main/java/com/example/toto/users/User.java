@@ -130,7 +130,7 @@ public class User extends Observable implements Storable, Parcelable, IUser {
 
     @Override
     public String getAvatar() {
-        return null;
+        return username;
     }
 
     public Bitmap getProfile_picture() {
