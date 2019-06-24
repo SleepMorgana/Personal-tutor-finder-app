@@ -171,13 +171,16 @@ public class UserManager {
                             initCurrentUser(user, new OnSuccessListener() {
                                 @Override
                                 public void onSuccess(Object o) {
+                                    
                                     //check if email wasn't verified unless the user is an admin
-                                    if (!finalFirebaseAuth.getCurrentUser().isEmailVerified() &&
+                                    
+                                    /*if (!finalFirebaseAuth.getCurrentUser().isEmailVerified() &&
                                             !currentUser.getUser().getRole().equals(Role.ADMIN)){
                                         if (failureListener != null)
                                             failureListener.onFailure(new InstantiationException("warning email has not been verified yet"));
                                         return;
-                                    }
+                                    }*/
+                                    
                                     //check if tutor has been accepted
                                     if (currentUser.getUser().getRole().equals(Role.TUTOR)
                                             && currentUser.getUser().getStatus().equals(Status.PENDING)){
